@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Programas">
+
+	<sql id="PropertiesProgramas">
+		SELECT 	codigo_programa, nombre_actividad, 
+				descripcion, justificacion, 
+				fecha_programa, fecha_culminacion, lugar, area
+		FROM programa
+	</sql>
+
+	<select id="ObtenerProgramas" resultClass="Programas">
+		<include refid="PropertiesProgramas" />
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="codigo_programa" compareValue="0" prepend="AND">
+				codigo_programa = #codigo_programa#
+			</isGreaterThan>
+			<isNotNull property="fecha_programa" prepend="AND">
+				fecha_programa = #fecha_programa#
+		</isNotNull>
+		</dynamic>
+		ORDER BY nombre_actividad ASC
+	</select>
+
+	<select id="VerificarIdProgramas" resultClass="java.lang.Integer">
+		SELECT count(codigo_programa)
+		FROM Programa
+		WHERE codigo_programa = #codigo_programa#
+  </select>
+	
+	<select id="BuscarProgramas" resultClass="Programas">
+		<include refid="PropertiesProgramas" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				cast(codigo_programa as char(100)) like #keywordList[]# OR
+				lower(nombre_actividad) like lower(#keywordList[]#) OR
+                                lower(area) like lower(#keywordList[]#) OR
+				to_char(fecha_programa,'YYYY-MM-DD') like
+				trim(replace(#keywordList[]#,'%',' '))
+		</iterate>
+		</dynamic>
+		ORDER BY nombre_actividad ASC
+	</select>
+<!-- 	<select id="VerificarExistenciaDescripcionProgramas" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Programas
+		WHERE UPPER(TRIM(nombre_Programas)) = UPPER(TRIM(#nombre_Programas#))
+  </select> -->
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarProgramas" parameterClass="Programas">
+		INSERT INTO programa(
+            nombre_actividad, descripcion, justificacion, 
+            fecha_programa, fecha_culminacion, lugar, area)
+		VALUES(#nombre_actividad#, #descripcion#, #justificacion#, 
+            #fecha_programa#, #fecha_culminacion#, #lugar#, #area#)
+  </insert>
+
+	<update id="ModificarProgramas" parameterClass="Programas">
+		UPDATE programa
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nombre_actividad">nombre_actividad=#nombre_actividad#</isNotNull>
+			<isNotNull prepend="," property="descripcion">descripcion=#descripcion#</isNotNull>
+			<isNotNull prepend="," property="justificacion">justificacion=#justificacion#</isNotNull>
+			<isNotNull prepend="," property="fecha_programa">fecha_programa=#fecha_programa#</isNotNull>
+			<isNotNull prepend="," property="fecha_culminacion">fecha_culminacion=#fecha_culminacion#</isNotNull>
+			<isNotNull prepend="," property="lugar">lugar=#lugar#</isNotNull>
+                        <isNotNull prepend="," property="area">area=#area#</isNotNull>
+		</dynamic>
+		WHERE codigo_programa = #codigo_programa#;		
+	</update>
+	<delete id="EliminarProgramas">
+		DELETE FROM Programa
+		WHERE codigo_programa = #codigo_programa#;		
+  </delete>
+   <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdProgramas" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdProgramas(?) }
+  </procedure> 
+</sqlMap>

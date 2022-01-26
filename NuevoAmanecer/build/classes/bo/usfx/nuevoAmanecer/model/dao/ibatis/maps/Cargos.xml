@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Cargos">
+
+
+    <sql id="PropertiesCargos">
+	SELECT codigo_cargo, nombre_cargo, descripcion
+	FROM cargo	  
+    </sql>
+
+	<!-- <select id="SistemaFormulariosXEmpleado" resultClass="SistemaFormularios">
+		SELECT codigo_formulario, nombre_formulario, estado, descripcion
+  		FROM sistema_formularios
+		<dynamic prepend="WHERE">
+			<isParameterPresent>
+				codigo_formulario = #codigo_formulario#
+			</isParameterPresent>
+		</dynamic>
+		ORDER BY codigo_formulario ASC
+	</select>-->
+	
+	<resultMap id="ListaSistemaFormulariosPermisosCargos2" class="SistemaFormulariosPermisosCargos">
+		<result property="codigo_cargo" column="codigo_cargo" />
+		<result property="codigo_formulario" column="codigo_formulario" />
+		<result property="permitir_insertar" column="permitir_insertar" />
+		<result property="permitir_editar" column="permitir_editar" />
+		<result property="pemitir_eliminar" column="pemitir_eliminar" />
+		<result property="permitir_navegar" column="permitir_navegar" />
+		<result property="permitir_reportes" column="permitir_reportes" />
+		<result property="permitir_anular" column="permitir_anular" />		
+		<result property="sistemaFormulario.nombre_formulario" column="nombre_formulario" />		
+		<result property="sistemaFormulario.codigo_formulario" column="codigo_formulario" />		
+		<!-- <result property="sistemaFormulario.nombre_formulario" select="SistemaFormulariosXEmpleado" column="codigo_formulario" /> -->
+	</resultMap>
+	
+	<select id="SistemaFormulariosPermisosXCargo" resultMap="ListaSistemaFormulariosPermisosCargos2">		
+		SELECT 
+		  sistema_formularios_permisos_Cargo.codigo_cargo, 
+		  sistema_formularios_permisos_Cargo.codigo_formulario, 
+		  sistema_formularios_permisos_Cargo.permitir_insertar, 
+		  sistema_formularios_permisos_Cargo.permitir_editar, 
+		  sistema_formularios_permisos_Cargo.pemitir_eliminar, 
+		  sistema_formularios_permisos_Cargo.permitir_navegar, 
+		  sistema_formularios_permisos_Cargo.permitir_anular, 
+		  sistema_formularios_permisos_Cargo.permitir_reportes,
+		  sistema_formularios.nombre_formulario  		  
+		FROM 
+		  sistema_formularios
+		  INNER JOIN sistema_formularios_permisos_Cargo 
+		  ON sistema_formularios.codigo_formulario = sistema_formularios_permisos_Cargo.codigo_formulario				
+		<dynamic prepend="WHERE">
+			<isParameterPresent>
+				codigo_cargo = #codigo_cargo#
+      		</isParameterPresent>
+		</dynamic>
+		  order by sistema_formularios.nombre_formulario ASC;
+	</select> 
+	
+	
+	<resultMap id="listaCargos" class="Cargos">
+		<result property="codigo_cargo" column="codigo_cargo" />
+		<result property="nombre_cargo" column="nombre_cargo" />
+		<result property="descripcion" column="descripcion" />		
+		<result property="listaPermisos" select="SistemaFormulariosPermisosXCargo" column="codigo_cargo" />
+	</resultMap>
+	
+	<resultMap id="listaCargos2" class="Cargos">
+		<result property="codigo_cargo" column="codigo_cargo" />
+		<result property="nombre_cargo" column="nombre_cargo" />
+		<result property="descripcion" column="descripcion" />				
+	</resultMap>
+	
+    <select id="ObtenerCargo" resultMap="listaCargos">
+        <include refid="PropertiesCargos" />
+		<dynamic prepend="WHERE">					
+				<isNotNull property="codigo_cargo" prepend="AND">
+					codigo_cargo = #codigo_cargo#
+				</isNotNull>				
+		</dynamic>
+			ORDER BY nombre_cargo ASC
+    </select>
+	
+	<select id="ObtenerCargo2" resultClass="Cargos">
+        <include refid="PropertiesCargos" />
+		<dynamic prepend="WHERE">					
+				<isNotNull property="codigo_cargo" prepend="AND">
+					TRIM(codigo_cargo) = TRIM(#codigo_cargo#)
+				</isNotNull>				
+		</dynamic>
+			ORDER BY nombre_cargo ASC
+    </select>
+
+	<select id="VerificarIdCargo" resultClass="java.lang.Integer">
+		SELECT count(codigo_cargo)
+		FROM Cargo
+		WHERE codigo_cargo = #codigo_cargo#;
+  </select>
+
+    <select id="VerificarExistenciaDescripcionCargo" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Cargo
+		WHERE UPPER(TRIM(nombre_cargo)) = UPPER(TRIM(#nombre_cargo#))                
+    </select>
+    <select id="BuscarCargos" resultMap="listaCargos">
+		<include refid="PropertiesCargos" />
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				codigo_cargo like #keywordList[]# OR
+				lower(nombre_cargo) like lower(#keywordList[]#)
+		</iterate>
+		</dynamic>
+		ORDER BY nombre_cargo ASC
+    </select>
+	<!-- Edicion de la Clase Proceso -->
+
+    <insert id="InsertarCargo" parameterClass="Cargos">
+	INSERT INTO Cargo(codigo_cargo, nombre_cargo, descripcion)
+        VALUES(UPPER(#codigo_cargo#), UPPER(#nombre_cargo#), #descripcion#)
+  </insert>
+
+	<update id="ModificarCargo" parameterClass="Cargos">
+		UPDATE Cargo
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="descripcion">descripcion=#descripcion#</isNotNull>
+			<isNotNull prepend="," property="nombre_cargo">nombre_cargo=UPPER(TRIM(#nombre_cargo#))</isNotNull>			
+		</dynamic>
+		WHERE codigo_cargo = #codigo_cargo#;
+	</update>	
+	
+	<delete id="EliminarCargo">
+		DELETE FROM sistema_formularios_permisos_cargo
+		WHERE codigo_cargo = #codigo_cargo#;
+		DELETE FROM Cargo
+		WHERE codigo_cargo = #codigo_cargo#;
+  </delete>
+  <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdCargo" parameterMap="parametros" resultClass="int">
+		{ call ObtenerUltimoIdCargos(?) }
+  </procedure>
+  
+</sqlMap>

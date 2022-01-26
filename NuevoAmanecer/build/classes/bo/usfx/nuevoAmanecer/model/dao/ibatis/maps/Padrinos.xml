@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Padrinos">
+
+	<sql id="PropertiesPadrinos">
+		SELECT 	codigo_padrino, 
+				numero_padrino, 
+				nombre, 
+				apellido_paterno, 
+				apellido_materno, 
+				nombre2, 
+				apellido_paterno2, 
+				apellido_materno2
+		FROM padrino
+
+  </sql>
+
+	<select id="ObtenerPadrinos" resultClass="Padrinos">
+		<include refid="PropertiesPadrinos" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="codigo_padrino">
+				 codigo_padrino = #codigo_padrino#
+		</isNotNull>
+		</dynamic>
+		ORDER BY apellido_paterno ASC
+	</select>
+
+	<select id="VerificarIdPadrinos" resultClass="java.lang.Integer">
+		SELECT count(codigo_padrino)
+		FROM Padrino
+		WHERE codigo_padrino = #codigo_padrino#;
+  </select>
+
+   <select id="VerificarExistenciaDescripcionPadrinos" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Padrino
+		WHERE UPPER(TRIM(apellido_paterno) || RTRIM(apellido_materno) || RTRIM(nombres)) = UPPER(TRIM(#apellido_paterno#) || RTRIM(#apellido_materno#) || RTRIM(#nombres#))
+  </select> 
+
+   <select id="BuscarPadrinos" resultClass="Padrinos">
+      <include refid="PropertiesPadrinos" />
+      <dynamic prepend="WHERE">
+		  <iterate property="keywordList" open="(" close=")" conjunction="OR">
+			cast(codigo_padrino as char(100)) like #keywordList[]# OR
+			UPPER(apellido_paterno) like UPPER(#keywordList[]#) OR
+			UPPER(apellido_materno) like UPPER(#keywordList[]#) OR
+			UPPER(nombre) like UPPER(#keywordList[]#) OR
+			UPPER(apellido_paterno2) like UPPER(#keywordList[]#) OR
+			UPPER(apellido_materno2) like UPPER(#keywordList[]#) OR
+			UPPER(nombre2) like UPPER(#keywordList[]#)
+		  </iterate>
+    </dynamic>
+    ORDER BY apellido_paterno ASC
+  </select>
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarPadrinos" parameterClass="Padrinos">
+		INSERT INTO padrino(numero_padrino, nombre, apellido_paterno, apellido_materno, 
+            nombre2, apellido_paterno2, apellido_materno2)
+		VALUES( #numero_padrino#, UPPER(#nombre#), UPPER(#apellido_paterno#), UPPER(#apellido_materno#), 
+            UPPER(#nombre2#), UPPER(#apellido_paterno2#), UPPER(#apellido_materno2#))
+  </insert>
+
+	<update id="ModificarPadrinos" parameterClass="Padrinos">
+		UPDATE Padrino
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="apellido_paterno">apellido_paterno=UPPER(#apellido_paterno#)</isNotNull>
+			<isNotNull prepend="," property="apellido_materno">apellido_materno=UPPER(#apellido_materno#)</isNotNull>
+			<isNotNull prepend="," property="nombre">nombre=UPPER(#nombre#)</isNotNull>		
+			<isNotNull prepend="," property="numero_padrino">numero_padrino=#numero_padrino#</isNotNull>
+			<isNotNull prepend="," property="apellido_paterno2">apellido_paterno2=UPPER(#apellido_paterno2#)</isNotNull>
+			<isNotNull prepend="," property="apellido_materno2">apellido_materno2=UPPER(#apellido_materno2#)</isNotNull>
+			<isNotNull prepend="," property="nombre2">nombre2=UPPER(#nombre2#)</isNotNull>
+		</dynamic>
+		WHERE codigo_padrino = #codigo_padrino#;
+	</update>
+	<delete id="EliminarPadrinos">
+		DELETE FROM Padrino WHERE codigo_padrino = #codigo_padrino#;
+  </delete>
+   <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdPadrinos" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdPadrinos(?) }
+  </procedure> 
+</sqlMap>

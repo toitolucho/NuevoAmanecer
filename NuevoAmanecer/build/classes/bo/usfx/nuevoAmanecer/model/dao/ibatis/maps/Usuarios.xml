@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Usuarios">
+
+
+    <sql id="PropertiesUsuarios">
+	SELECT
+                codigo_usuario,
+                nombres,
+                apellidos,
+                direccion,
+                telefono,
+                nombre_cuenta,
+                contrasenia,
+                codigo_estado,
+                fecha_registro,
+				codigo_tipo_usuario
+        FROM usuarios
+    </sql>
+
+	<select id="SistemaFormulariosXEmpleado" resultClass="SistemaFormularios">
+		SELECT codigo_formulario, nombre_formulario, estado, descripcion
+  		FROM sistema_formularios
+		<dynamic prepend="WHERE">
+			<isParameterPresent>
+				codigo_formulario = #codigo_formulario#
+			</isParameterPresent>
+		</dynamic>
+		ORDER BY codigo_formulario ASC
+	</select>
+	
+	<resultMap id="ListaSistemaFormulariosPermisosUsuarios" class="SistemaFormulariosPermisosUsuarios">
+		<result property="codigo_usuario" column="codigo_usuario" />
+		<result property="codigo_formulario" column="codigo_formulario" />
+		<result property="permitir_insertar" column="permitir_insertar" />
+		<result property="permitir_editar" column="permitir_editar" />
+		<result property="pemitir_eliminar" column="pemitir_eliminar" />
+		<result property="permitir_navegar" column="permitir_navegar" />
+		<result property="permitir_reportes" column="permitir_reportes" />
+		<result property="permitir_anular" column="permitir_anular" />		
+		<result property="sistemaFormulario" select="SistemaFormulariosXEmpleado" column="codigo_formulario" />
+	</resultMap>
+	
+	<select id="SistemaFormulariosPermisosXEmpleado" resultMap="ListaSistemaFormulariosPermisosUsuarios">		
+		SELECT 
+		  sistema_formularios_permisos_usuarios.codigo_usuario, 
+		  sistema_formularios_permisos_usuarios.codigo_formulario, 
+		  sistema_formularios_permisos_usuarios.permitir_insertar, 
+		  sistema_formularios_permisos_usuarios.permitir_editar, 
+		  sistema_formularios_permisos_usuarios.pemitir_eliminar, 
+		  sistema_formularios_permisos_usuarios.permitir_navegar, 
+		  sistema_formularios_permisos_usuarios.permitir_anular, 
+		  sistema_formularios_permisos_usuarios.permitir_reportes		  
+		FROM 
+		  sistema_formularios
+		  LEFT JOIN sistema_formularios_permisos_usuarios 
+		  ON sistema_formularios.codigo_formulario = sistema_formularios_permisos_usuarios.codigo_formulario
+		
+				
+		<dynamic prepend="WHERE">
+			<isParameterPresent>
+				codigo_usuario = #codigo_usuario#
+      		</isParameterPresent>
+		</dynamic>
+		  ORDER BY sistema_formularios.nombre_formulario ASC;
+	</select>
+	
+	
+	<resultMap id="listaUsuarios" class="Usuarios">
+		<result property="codigo_usuario" column="codigo_usuario" />
+		<result property="nombres" column="nombres" />
+		<result property="apellidos" column="apellidos" />
+		<result property="direccion" column="direccion" />		
+		<result property="telefono" column="telefono" />
+		<result property="nombre_cuenta" column="nombre_cuenta" />
+		<result property="contrasenia" column="contrasenia" />
+		<result property="codigo_estado" column="codigo_estado" />
+		<result property="fecha_registro" column="fecha_registro" />
+		<result property="codigo_tipo_usuario" column="codigo_tipo_usuario" />
+		<!-- <result property="login" column="login" />
+		<result property="password" column="password" />
+		<result property="estado" column="estado" />
+		<result property="maxlogro" column="maxlogro" />
+		<result property="fechaing" column="fechaing" />		
+		<result property="idtcargo_tcargo" column="idtcargo_tcargo" />
+		<result property="cargo" select="CargoXEmpleado" column="idtcargo_tcargo" /> -->
+		<result property="listadoInterfacesPermisos" select="SistemaFormulariosPermisosXEmpleado" column="codigo_usuario" />
+	</resultMap>
+	
+	
+	
+    <select id="ObtenerUsuarios" resultMap="listaUsuarios">
+        <include refid="PropertiesUsuarios" />
+		<dynamic prepend="WHERE">
+				<isGreaterThan property="codigo_usuario" compareValue="0" prepend="AND">
+					codigo_usuario = #codigo_usuario#
+				</isGreaterThan>
+				<isNotNull property="nombre_cuenta" prepend="AND">
+					nombre_cuenta = #nombre_cuenta# AND codigo_estado = 'V'
+				</isNotNull>
+				<isNotNull property="contrasenia" prepend="AND">
+					contrasenia = #contrasenia# AND codigo_estado = 'V'
+				</isNotNull>
+		</dynamic>
+			ORDER BY apellidos ASC
+    </select>
+
+	<select id="VerificarIdUsuarios" resultClass="java.lang.Integer">
+		SELECT count(codigo_usuario)
+		FROM Usuarios
+		WHERE codigo_usuario = #codigo_usuario#;
+  </select>
+
+    <select id="VerificarExistenciaDescripcionUsuarios" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Usuarios
+		WHERE UPPER(TRIM(nombres)) = UPPER(TRIM(#nombres#))
+                AND UPPER(TRIM(apellidos)) = UPPER(TRIM(#apellidos#))
+    </select>
+    <select id="BuscarUsuarios" resultMap="listaUsuarios">
+		<include refid="PropertiesUsuarios" />
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				cast(codigo_usuario as char(100)) like #keywordList[]# OR
+				lower(nombres) like lower(#keywordList[]#) OR
+                                lower(apellidos) like lower(#keywordList[]#) OR
+                                lower(nombre_cuenta) like lower(#keywordList[]#) OR
+				to_char(fecha_registro,'YYYY-MM-DD') like
+				trim(replace(#keywordList[]#,'%',' '))
+		</iterate>
+		</dynamic>
+		ORDER BY apellidos ASC
+    </select>
+	<!-- Edicion de la Clase Proceso -->
+
+    <insert id="InsertarUsuarios" parameterClass="Usuarios">
+	INSERT INTO usuarios(nombres, apellidos, direccion, telefono, nombre_cuenta,
+            contrasenia, codigo_estado, fecha_registro, codigo_tipo_usuario)
+        VALUES(UPPER(#nombres#), UPPER(#apellidos#), UPPER(#direccion#), #telefono#, #nombre_cuenta#,
+            #contrasenia#, #codigo_estado#, now(), #codigo_tipo_usuario#);
+			
+	INSERT INTO sistema_formularios_permisos_usuarios
+	SELECT ObtenerUltimoIdUsuarios('A'), codigo_formulario, permitir_insertar, permitir_editar, 
+			pemitir_eliminar, permitir_navegar, permitir_reportes, permitir_anular
+	FROM sistema_formularios_permisos_cargo
+	WHERE sistema_formularios_permisos_cargo.codigo_cargo = #codigo_tipo_usuario#;
+  </insert>
+
+	<update id="ModificarUsuarios" parameterClass="Usuarios">
+		UPDATE Usuarios
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nombres">nombres=#nombres#</isNotNull>
+			<isNotNull prepend="," property="apellidos">apellidos=UPPER(TRIM(#apellidos#))</isNotNull>
+			<isNotNull prepend="," property="direccion">direccion=UPPER(TRIM(#direccion#))</isNotNull>
+			<isNotNull prepend="," property="telefono">telefono=UPPER(TRIM(#telefono#))</isNotNull>
+			<isNotNull prepend="," property="nombre_cuenta">nombre_cuenta=#nombre_cuenta#</isNotNull>
+			<isNotNull prepend="," property="contrasenia">contrasenia=#contrasenia#</isNotNull>
+			<isNotNull prepend="," property="codigo_estado">codigo_estado=#codigo_estado#</isNotNull>
+			<isNotNull prepend="," property="codigo_tipo_usuario">codigo_tipo_usuario=#codigo_tipo_usuario#</isNotNull>			
+		</dynamic>
+		WHERE codigo_usuario = #codigo_usuario#;
+		
+		DELETE FROM sistema_formularios_permisos_usuarios
+		WHERE codigo_usuario = #codigo_usuario#;
+		
+		INSERT INTO sistema_formularios_permisos_usuarios
+		SELECT #codigo_usuario#, codigo_formulario, permitir_insertar, permitir_editar, 
+				pemitir_eliminar, permitir_navegar, permitir_reportes, permitir_anular
+		FROM sistema_formularios_permisos_cargo
+		WHERE sistema_formularios_permisos_cargo.codigo_cargo = #codigo_tipo_usuario#;
+	</update>
+	
+	<update id="ControlarEdadesAfiliados" parameterClass="Usuarios">
+		UPDATE familia
+		SET codigo_estado_familia = 'B'
+		WHERE codigo_persona IN(
+			SELECT fam.codigo_persona
+			FROM 
+			  familia  fam
+			  INNER JOIN public.afiliado
+			  ON afiliado.codigo_persona = fam.codigo_persona
+			  LEFT JOIN public.caso 
+			  ON afiliado.numero_caso = caso.numero_caso
+			WHERE    
+			  obteneredad(fam.fecha_nacimiento, now()::date) >= 21
+			  and codigo_estado_familia = 'H'
+		)
+	</update>
+	<delete id="EliminarUsuarios">
+		DELETE FROM Usuarios
+		WHERE codigo_usuario = #codigo_usuario#;
+  </delete>
+  <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdUsuarios" parameterMap="parametros" resultClass="int">
+		{ call ObtenerUltimoIdUsuarios(?) }
+  </procedure>
+  
+  <procedure id="esAfiliado" parameterMap="parametros" resultClass="boolean">
+		{ call esAfiliado(?) }
+  </procedure>
+  
+  <procedure id="sePuedeAgregarAfiliado" parameterMap="parametros" resultClass="boolean">
+		{ call sePuedeAgregarAfiliado(?) }
+  </procedure>
+  
+  <parameterMap id="parametros2" class="java.util.Map">
+		<parameter property="FechaNacimiento" />
+		<parameter property="FechaActual" />
+	</parameterMap>
+	<procedure id="ObtenerEdadActual" parameterMap="parametros2" resultClass="int">
+		{ call ObtenerEdad(?,?) }
+	</procedure>
+	
+	<parameterMap id="parametro3" class="java.util.Map">		
+		<parameter property="parametro_fecha_nacimiento" />
+		<parameter property="parametro_sexo" />
+		<parameter property="parametro_talla" />		 
+	</parameterMap>
+	<procedure id="ObtenerTallaEdad" parameterMap="parametro3" resultClass="int">
+		{ call ObtenerTallaEdad(?,?,50) }
+	</procedure>
+	
+	<procedure id="ObtenerPesoEdad" parameterMap="parametro3" resultClass="int">
+		{ call ObtenerPesoEdad(?,?,50) }
+	</procedure>
+  
+	<procedure id="ObtenerEdadMeses" parameterMap="parametros2" resultClass="int">
+		{ call ObtenerEdadMeses(?,?) }
+	</procedure>
+  
+    <select id="ObtenerFechaHoraServidor" resultClass="java.util.Date">
+		  select obtenerFechaHoraServidor('T');
+  </select>
+
+</sqlMap>

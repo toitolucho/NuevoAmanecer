@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SaludPublica">
+
+	<sql id="PropertiesSaludPublica">
+		SELECT 	numero_familia, 
+				fecha_registro, 
+				eda, 
+				ira, 
+				agua, 
+				excretas, 
+				vivienda, 
+				tipo_vivienda, 
+				material_vivienda, 
+				numero_habitaciones, 
+				dormitorios, 
+				cocina
+		FROM saludpublica
+  </sql>
+
+	<select id="ObtenerSaludPublica" resultClass="SaludPublica">
+		<include refid="PropertiesSaludPublica" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="fecha_registro" prepend="AND">
+				 fecha_registro = #fecha_registro#
+			</isNotNull>
+			<isGreaterThan property="numero_familia" compareValue="0" prepend="AND">
+				numero_familia = #numero_familia#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY fecha_registro ASC
+	</select>
+
+	<select id="VerificarIdSaludPublica" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM SaludPublica
+		WHERE numero_familia = #numero_familia#
+		
+  </select>
+
+   <select id="BuscarSaludPublica" resultClass="SaludPublica">
+      <include refid="PropertiesSaludPublica" />
+      <dynamic prepend="WHERE">
+		  <iterate property="keywordList" open="(" close=")" conjunction="OR">
+			cast(numero_familia as char(100)) like #keywordList[]# OR
+			UPPER(tipo_vivienda) like UPPER(#keywordList[]#) OR
+			UPPER(material_vivienda) like UPPER(#keywordList[]#) OR
+			to_char(fecha_registro,'YYYY-MM-DD') like
+				trim(replace(#keywordList[]#,'%',' '))
+		  </iterate>
+    </dynamic>
+    ORDER BY fecha_registro ASC
+  </select>
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarSaludPublica" parameterClass="SaludPublica">
+		INSERT INTO saludpublica(
+            numero_familia, fecha_registro, eda, ira, agua, excretas, vivienda, 
+            tipo_vivienda, material_vivienda, numero_habitaciones, dormitorios, 
+            cocina)
+		VALUES(#numero_familia#, now(), #eda#, #ira#, #agua#, #excretas#, #vivienda#,
+            #tipo_vivienda#, #material_vivienda#, #numero_habitaciones#, #dormitorios#, 
+            #cocina#)
+  </insert>
+
+	<update id="ModificarSaludPublica" parameterClass="SaludPublica">
+		UPDATE SaludPublica
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="eda">eda=#eda#</isNotNull>
+			<isNotNull prepend="," property="ira">ira=#ira#</isNotNull>
+			<isNotNull prepend="," property="agua">agua=#agua#</isNotNull>		
+			<isNotNull prepend="," property="excretas">excretas=#excretas#</isNotNull>
+			<isNotNull prepend="," property="vivienda">vivienda=#vivienda#</isNotNull>
+			<isNotNull prepend="," property="tipo_vivienda">tipo_vivienda=#tipo_vivienda#</isNotNull>
+			<isNotNull prepend="," property="material_vivienda">material_vivienda=#material_vivienda#</isNotNull>
+			<isNotNull prepend="," property="numero_habitaciones">numero_habitaciones=#numero_habitaciones#</isNotNull>
+			<isNotNull prepend="," property="dormitorios">dormitorios=#dormitorios#</isNotNull>
+			<isNotNull prepend="," property="cocina">cocina=#cocina#</isNotNull>
+		</dynamic>
+		WHERE numero_familia = #numero_familia#;
+		
+	</update>
+	<delete id="EliminarSaludPublica">
+		DELETE FROM SaludPublica 
+		WHERE numero_familia = #numero_familia#
+		AND fecha_registro = #fecha_registro#;
+  </delete> 
+</sqlMap>

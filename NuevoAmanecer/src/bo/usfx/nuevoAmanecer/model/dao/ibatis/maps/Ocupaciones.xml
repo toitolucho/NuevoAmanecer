@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Ocupaciones">
+
+	<sql id="PropertiesOcupaciones">
+		SELECT codigo_ocupacion, nombre_ocupacion
+		FROM ocupaciones
+  </sql>
+
+	<select id="ObtenerOcupaciones" resultClass="Ocupaciones">
+		<include refid="PropertiesOcupaciones" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="codigo_ocupacion">
+				codigo_ocupacion = #codigo_ocupacion#
+			</isNotNull>
+		</dynamic>
+		ORDER BY nombre_ocupacion ASC
+	</select>
+
+	<select id="VerificarIdOcupaciones" resultClass="java.lang.Integer">
+		SELECT count(codigo_ocupacion)
+		FROM Ocupaciones
+		WHERE codigo_ocupacion = #codigo_ocupacion#;
+  </select>
+
+<!-- 	<select id="VerificarExistenciaDescripcionOcupaciones" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Ocupaciones
+		WHERE UPPER(TRIM(nombre_Ocupaciones)) = UPPER(TRIM(#nombre_Ocupaciones#))
+  </select> -->
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarOcupaciones" parameterClass="Ocupaciones">
+		INSERT INTO Ocupaciones( nombre_ocupacion)
+		VALUES(#nombre_ocupacion#)
+  </insert>
+
+	<update id="ModificarOcupaciones" parameterClass="Ocupaciones">
+		UPDATE Ocupaciones
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nombre_ocupacion">nombre_ocupacion=#nombre_ocupacion#</isNotNull>			
+		</dynamic>
+		WHERE codigo_ocupacion = #codigo_ocupacion#;
+	</update>
+	<delete id="EliminarOcupaciones">
+		DELETE FROM Ocupaciones 
+		WHERE codigo_ocupacion = #codigo_ocupacion#;
+  </delete>
+  <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdOcupaciones" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdOcupaciones(?) }
+  </procedure> 
+</sqlMap>

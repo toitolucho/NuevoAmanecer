@@ -1,0 +1,26 @@
+            //UIManager.setLookAndFeel("org.fife.plaf.Office2003.Office2003LookAndFeel");
+            //UIManager.setLookAndFeel("org.fife.plaf.OfficeXP.OfficeXPLookAndFeel");
+            //UIManager.setLookAndFeel("org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel");
+                public final void initializeLookAndFeels(){
+        // if in classpath thry to load JGoodies Plastic Look & Feel
+        try {
+            LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
+            boolean found = false;
+            for (int i = 0; i < lnfs.length; i++) {
+                    if (lnfs[i].getName().equals("JGoodies Plastic 3D")) {
+                            found = true;
+                    }
+            }
+            if (!found) {
+                    UIManager.installLookAndFeel("JGoodies Plastic 3D",
+                                    "com.jgoodies.looks.plastic.Plastic3DLookAndFeel");
+            }
+            UIManager.setLookAndFeel("com.jgoodies.looks.plastic.Plastic3DLookAndFeel");
+        }catch (Throwable t) {
+            try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                    e.printStackTrace();
+            }
+        }
+    }

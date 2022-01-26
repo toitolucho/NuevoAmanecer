@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Casos">
+
+	<sql id="PropertiesCasos">
+		SELECT 
+		  caso.fecha_registro, 
+		  caso.numero_caso, 
+		  caso.codigo_padrino, 
+		  padrino.nombre as nombre1, 
+		  padrino.apellido_paterno as apellido_paterno1, 
+		  padrino.apellido_materno as apellido_materno1, 
+		  padrino.nombre2, 
+		  padrino.apellido_paterno2, 
+		  padrino.apellido_materno2, 
+		  familia.nombres as nombres_afi, 
+		  familia.ci, 
+		  familia.apellido_paterno as apellido_paterno_afi, 
+		  familia.apellido_materno as apellido_materno_afi
+		FROM   
+		  public.afiliado
+		  INNER JOIN public.familia
+		  ON familia.codigo_persona = afiliado.codigo_persona
+		  INNER JOIN public.caso
+		  ON afiliado.numero_caso = caso.numero_caso
+		  INNER JOIN public.padrino
+		  ON padrino.codigo_padrino = caso.codigo_padrino
+  </sql>
+	
+	<resultMap id="listaCasos" class="Casos">
+		<result property="fecha_registro" column="fecha_registro" />
+		<result property="numero_caso" column="numero_caso" />
+		<result property="codigo_padrino" column="codigo_padrino" />
+		<result property="afiliado.nombres" column="nombres_afi" />
+		<result property="afiliado.ci" column="ci" />
+		<result property="afiliado.apellido_paterno" column="apellido_paterno_afi" />
+		<result property="afiliado.apellido_materno" column="apellido_materno_afi" />
+		<result property="patrocinador1.nombre" column="nombre1" />
+		<result property="patrocinador1.apellido_paterno" column="apellido_paterno1" />
+		<result property="patrocinador1.apellido_materno" column="apellido_materno1" />
+		<result property="patrocinador1.nombre2" column="nombre2" />
+		<result property="patrocinador1.apellido_paterno2" column="apellido_paterno2" />
+		<result property="patrocinador1.apellido_materno" column="apellido_materno2" />		
+	</resultMap>
+	
+	
+	<select id="ObtenerCasos" resultMap="listaCasos">
+		<include refid="PropertiesCasos" />
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="numero_caso" compareValue="0" prepend="AND">
+				caso.numero_caso = #numero_caso#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY caso.numero_caso ASC
+	</select>
+
+	<select id="BuscarCasos" resultMap="listaCasos">
+		<include refid="PropertiesCasos" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">				
+				cast(familia.codigo_persona as char(100)) like #keywordList[]# OR
+				cast(caso.numero_caso as char(100)) like #keywordList[]# OR				
+				lower(familia.nombres) like lower(#keywordList[]#) OR
+				lower(familia.apellido_paterno) like lower(#keywordList[]#) OR
+				lower(familia.apellido_materno) like lower(#keywordList[]#) OR
+				lower(padrino.nombre) like lower(#keywordList[]#) OR
+				lower(padrino.apellido_paterno) like lower(#keywordList[]#) OR
+				lower(padrino.apellido_materno) like lower(#keywordList[]#) OR
+				to_char(caso.fecha_registro,'YYYY-MM-DD') like trim(replace(#keywordList[]#,'%',' '))
+		</iterate>
+		</dynamic>
+		ORDER BY caso.numero_caso ASC
+	</select>
+	
+	
+	<select id="VerificarIdCasos" resultClass="java.lang.Integer">
+		SELECT count(numero_caso)
+		FROM caso
+		WHERE numero_caso = #numero_caso#;
+  </select>
+
+<!-- 	<select id="VerificarExistenciaDescripcionCasos" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Casos
+		WHERE UPPER(TRIM(nombre_Casos)) = UPPER(TRIM(#nombre_Casos#))
+  </select> -->
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarCasos" parameterClass="Casos">
+		INSERT INTO caso( numero_caso, codigo_padrino, fecha_registro)
+		VALUES(#numero_caso#, #codigo_padrino#, now());
+		
+				
+		UPDATE afiliado
+		SET tipo = 'Patrocinado'
+		WHERE numero_caso = #numero_caso#;
+  </insert>
+
+	<update id="ModificarCasos" parameterClass="Casos">
+		UPDATE caso
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="codigo_padrino">codigo_padrino=#codigo_padrino#</isNotNull>
+		</dynamic>
+		WHERE numero_caso = #numero_caso#;
+	</update>
+	<delete id="EliminarCasos">
+		DELETE FROM caso 
+		WHERE numero_caso = #numero_caso#;
+  </delete>
+  <!-- <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdCasos" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdCasos(?) }
+  </procedure> -->
+</sqlMap>

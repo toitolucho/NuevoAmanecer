@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Familiar">
+
+	<sql id="PropertiesFamiliar">
+		SELECT 
+		  familia.codigo_persona, 
+		  familia.ci, 
+		  familia.nombres, 
+		  familia.apellido_paterno, 
+		  familia.apellido_materno, 
+		  familia.parentesco, 
+		  familia.sexo, 
+		  familia.fecha_nacimiento, 
+		  familia.con_certificado, 
+		  familia.fecha_alfetizacion, 
+		  familia.alfabetizado, 
+		  familia.codigo_actividad_educactiva, 
+		  familia.codigo_estado_familia,
+		  familia.ruta_archivo_imagen,
+		  CASE WHEN familia.codigo_ocupacion IS NULL THEN -1 ELSE familia.codigo_ocupacion END AS codigo_ocupacion, 
+		  familia.tipo_ocu, 
+		  familia.codigo_evento_vital, 
+		  familia.codigo_causa_muerte, 
+		  familia.numero_familia, 
+		  familiar.vacuna_madre, 
+		  ocupaciones.nombre_ocupacion, 
+		  eventos_vitales.nombre_evento_vital, 
+		  causas_muerte.nommbre_causa_muerte, 
+		  actividad_educativa.nombre_actividad_educativa
+		FROM 
+		  public.familia
+		  INNER JOIN public.familiar
+		  ON familia.codigo_persona = familiar.codigo_persona		  
+		  AND estaTarjetaHabilitada(familia.numero_familia) = true
+		  LEFT JOIN public.causas_muerte
+		  ON familia.codigo_causa_muerte = causas_muerte.codigo_causa_muerte
+		  LEFT JOIN public.eventos_vitales
+		  ON familia.codigo_evento_vital = eventos_vitales.codigo_evento_vital
+		  LEFT JOIN public.ocupaciones
+		  ON familia.codigo_ocupacion = ocupaciones.codigo_ocupacion
+		  LEFT JOIN public.actividad_educativa
+		  ON familia.codigo_actividad_educactiva = actividad_educativa.codigo_actividad_educactiva		  
+		  
+		  <!-- AND estaTarjetaHabilitada(familia.numero_familia) = true
+		  AND familia.codigo_Estado_familia = 'H' -->
+  </sql>
+	
+	<resultMap id="listaFamiliar" class="Familiar">
+		<result property="codigo_persona" column="codigo_persona" />
+		<result property="ci" column="ci" />
+		<result property="nombres" column="nombres" />
+		<result property="apellido_paterno" column="apellido_paterno" />
+		<result property="apellido_materno" column="apellido_materno" />
+		<result property="parentesco" column="parentesco" />
+		<result property="sexo" column="sexo" />
+		<result property="fecha_nacimiento" column="fecha_nacimiento" />
+		<result property="con_certificado" column="con_certificado" />
+		<result property="alfabetizado" column="alfabetizado" />
+		<result property="fecha_alfetizacion" column="fecha_alfetizacion" />
+		<result property="codigo_actividad_educactiva" column="codigo_actividad_educactiva" />
+		<result property="tipo_ocu" column="tipo_ocu" />
+		<result property="codigo_evento_vital" column="codigo_actividad_educactiva" />
+		<result property="codigo_causa_muerte" column="codigo_causa_muerte" />
+		<result property="numero_familia" column="numero_familia" />
+		<result property="ruta_archivo_imagen" column="ruta_archivo_imagen" />		
+		<result property="codigo_estado_familia" column="codigo_estado_familia" />
+		<result property="ocupacion.codigo_ocupacion" column="codigo_ocupacion" />
+		<result property="ocupacion.nombre_ocupacion" column="nombre_ocupacion" />
+		<result property="actividadEducativa.codigo_actividad_educactiva" column="codigo_actividad_educactiva" />
+		<result property="actividadEducativa.nombre_actividad_educativa" column="nombre_actividad_educativa" />
+		<result property="eventoVital.codigo_evento_vital" column="codigo_evento_vital" />
+		<result property="eventoVital.nombre_evento_vital" column="nombre_evento_vital" />
+		<result property="causaMuerte.codigo_causa_muerte" column="codigo_causa_muerte" />
+		<result property="causaMuerte.nommbre_causa_muerte" column="nommbre_causa_muerte" />
+		<result property="vacuna_madre" column="vacuna_madre" />
+	</resultMap>
+	
+	<select id="ObtenerFamiliar" resultMap="listaFamiliar">
+		<include refid="PropertiesFamiliar" />
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="codigo_persona" compareValue="0" prepend="AND">
+				familia.codigo_persona = #codigo_persona#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY apellido_paterno ASC
+	</select>
+	
+	<!-- N�mero de Caso
+	Nombre
+	Ap. Paterno
+	Ap. Materno
+	Codigo de Persona
+ -->
+	<select id="BuscarFamiliar" resultMap="listaFamiliar">
+		<include refid="PropertiesFamiliar" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">				
+				cast(familia.codigo_persona as char(100)) like #keywordList[]# OR				
+				lower(nombres) like lower(#keywordList[]#) OR
+				lower(apellido_paterno) like lower(#keywordList[]#) OR
+				lower(apellido_materno) like lower(#keywordList[]#)
+		</iterate>
+		</dynamic>
+		ORDER BY apellido_paterno ASC
+	</select>
+
+	<select id="VerificarIdFamiliar" resultClass="java.lang.Integer">
+		SELECT count(codigo_persona)
+		FROM Familiar
+		WHERE codigo_persona = #codigo_persona#;
+  </select>
+
+	<select id="VerificarExistenciaDescripcionFamiliar" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM familia
+		WHERE UPPER(TRIM(nombres)) = UPPER(TRIM(#nombres#))
+		AND UPPER(TRIM(apellido_paterno)) = UPPER(TRIM(#apellido_paterno#))
+		AND UPPER(TRIM(apellido_materno)) = UPPER(TRIM(#apellido_materno#))
+	</select> 
+
+	<insert id="InsertarFamiliar" parameterClass="Familiar">
+		INSERT INTO Familia(
+            ci, nombres, apellido_paterno, apellido_materno,
+            parentesco, sexo, fecha_nacimiento, con_certificado, alfabetizado,
+            fecha_alfetizacion, codigo_actividad_educactiva, codigo_ocupacion,
+            tipo_ocu, codigo_evento_vital, codigo_causa_muerte, numero_familia, ruta_archivo_imagen)
+		VALUES(#ci#, UPPER(TRIM(#nombres#)), UPPER(TRIM(#apellido_paterno#)), UPPER(TRIM(#apellido_materno#)),
+            #parentesco#, #sexo#, #fecha_nacimiento#, #con_certificado#, #alfabetizado#,
+            #fecha_alfetizacion#, #codigo_actividad_educactiva#, CASE WHEN #codigo_ocupacion# = -1 THEN NULL ELSE #codigo_ocupacion# END,
+            #tipo_ocu#, #codigo_evento_vital#, #codigo_causa_muerte#, #numero_familia#, #ruta_archivo_imagen#);
+
+		INSERT INTO familiar(vacuna_madre, codigo_persona)
+		VALUES (#vacuna_madre#,  obtenerultimoidfamilia(''));
+
+  </insert>
+
+	<update id="ModificarFamiliar" parameterClass="Familiar">
+		UPDATE Familia
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="ci">ci=#ci#</isNotNull>
+			<isNotNull prepend="," property="nombres">nombres=UPPER(TRIM(#nombres#))</isNotNull>
+			<isNotNull prepend="," property="apellido_paterno">apellido_paterno=UPPER(TRIM(#apellido_paterno#))</isNotNull>
+			<isNotNull prepend="," property="apellido_materno">apellido_materno=UPPER(TRIM(#apellido_materno#))</isNotNull>
+			<isNotNull prepend="," property="parentesco">parentesco=#parentesco#</isNotNull>
+			<isNotNull prepend="," property="sexo">sexo=#sexo#</isNotNull>
+			<isNotNull prepend="," property="fecha_nacimiento">fecha_nacimiento=#fecha_nacimiento#</isNotNull>
+			<isNotNull prepend="," property="con_certificado">con_certificado=#con_certificado#</isNotNull>
+			<isNotNull prepend="," property="alfabetizado">alfabetizado=#alfabetizado#</isNotNull>
+			<isNotNull prepend="," property="fecha_alfetizacion">fecha_alfetizacion=#fecha_alfetizacion#</isNotNull>
+			<isNotNull prepend="," property="codigo_actividad_educactiva">codigo_actividad_educactiva=#codigo_actividad_educactiva#</isNotNull>
+			<isGreaterThan prepend="," property="codigo_ocupacion" compareValue="0">codigo_ocupacion=#codigo_ocupacion#</isGreaterThan>
+			<isNotNull prepend="," property="tipo_ocu">tipo_ocu=#tipo_ocu#</isNotNull>
+			<isNotNull prepend="," property="codigo_evento_vital">codigo_evento_vital=#codigo_evento_vital#</isNotNull>
+			<isNotNull prepend="," property="codigo_causa_muerte">codigo_causa_muerte=#codigo_causa_muerte#</isNotNull>
+			<isNotNull prepend="," property="numero_familia">numero_familia=#numero_familia#</isNotNull>
+			<isNotNull prepend="," property="codigo_estado_familia">codigo_estado_familia=#codigo_estado_familia#</isNotNull>
+			<isNotNull prepend="," property="ruta_archivo_imagen">ruta_archivo_imagen=#ruta_archivo_imagen#</isNotNull>			
+		</dynamic>
+		WHERE codigo_persona = #codigo_persona#;
+
+		UPDATE Familiar
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="vacuna_madre">vacuna_madre=#vacuna_madre#</isNotNull>
+		</dynamic>
+		WHERE codigo_persona = #codigo_persona#;
+	</update>
+	<delete id="EliminarFamiliar">
+		DELETE FROM Familiar
+		WHERE codigo_persona = #codigo_persona#;
+
+		DELETE FROM Familia
+		WHERE codigo_persona = #codigo_persona#;
+  </delete>
+  <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdFamiliar" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdFamilia(?) }
+  </procedure>
+</sqlMap>

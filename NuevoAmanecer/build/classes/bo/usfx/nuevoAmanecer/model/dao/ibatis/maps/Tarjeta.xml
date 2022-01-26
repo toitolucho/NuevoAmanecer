@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Tarjeta">
+
+	<sql id="PropertiesTarjeta">
+		SELECT distinct t.numero_familia, t.descripcion, t.fecha_registro_tarjeta, t.comunidad, t.barrio, t.numero_vivienda,
+		t.observaciones, t.plano_vivienda, t.numero_proyecto, t.codigo_estado_tarjeta
+		FROM tarjeta t
+  </sql>
+
+	<select id="ObtenerTarjeta" resultClass="Tarjeta">
+		<include refid="PropertiesTarjeta" />
+		<dynamic prepend="WHERE">
+<!--			 <isNotNull property="descripcion" prepend="AND">
+				descripcion = #descripcion#
+			</isNotNull> -->
+			<isGreaterThan property="numero_familia" compareValue="0" prepend="AND">
+				numero_familia = #numero_familia#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY numero_familia ASC
+	</select>
+
+        <select id="BuscarTarjeta" resultClass="Tarjeta">
+		<include refid="PropertiesTarjeta" />
+                left join familia f
+		on f.numero_familia = t.numero_familia
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				cast(t.numero_familia as char(100)) like #keywordList[]# OR
+				lower(t.descripcion) like lower(#keywordList[]#) OR
+                                lower(f.nombres) like lower(#keywordList[]#) OR
+                                lower(f.apellido_paterno) like lower(#keywordList[]#) OR
+                                lower(f.apellido_materno) like lower(#keywordList[]#) OR
+				to_char(t.fecha_registro_tarjeta,'YYYY-MM-DD') like trim(replace(#keywordList[]#,'%',' '))
+		</iterate>
+		</dynamic>
+		ORDER BY t.numero_familia ASC
+	</select>
+        
+	<select id="VerificarIdTarjeta" resultClass="java.lang.Integer">
+		SELECT count(numero_familia)
+		FROM Tarjeta
+		WHERE numero_familia = #numero_familia#;
+  </select>
+
+<!-- 	<select id="VerificarExistenciaDescripcionTarjeta" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Tarjeta
+		WHERE UPPER(TRIM(nombre_Tarjeta)) = UPPER(TRIM(#nombre_Tarjeta#))
+  </select> -->
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarTarjeta" parameterClass="Tarjeta">
+		INSERT INTO tarjeta( fecha_registro_tarjeta, comunidad, barrio, numero_vivienda, 
+            observaciones, plano_vivienda, numero_proyecto, descripcion)
+		VALUES(now(), #comunidad#, #barrio#, #numero_vivienda#, 
+            #observaciones#, #plano_vivienda#, #numero_proyecto#, #descripcion#)
+  </insert>
+
+	<update id="ModificarTarjeta" parameterClass="Tarjeta">
+		UPDATE Tarjeta
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="comunidad">comunidad=#comunidad#</isNotNull>
+			<isNotNull prepend="," property="barrio">barrio=#barrio#</isNotNull>
+			<isNotNull prepend="," property="numero_vivienda">numero_vivienda=#numero_vivienda#</isNotNull>			
+			<isNotNull prepend="," property="observaciones">observaciones=#observaciones#</isNotNull>
+			<isNotNull prepend="," property="plano_vivienda">plano_vivienda=#plano_vivienda#</isNotNull>
+			<isNotNull prepend="," property="codigo_estado_tarjeta">codigo_estado_tarjeta=#codigo_estado_tarjeta#</isNotNull>
+			<isNotNull prepend="," property="descripcion">descripcion=#descripcion#</isNotNull>
+			<isGreaterThan prepend="," property="numero_proyecto" compareValue="0">numero_proyecto=#numero_proyecto#</isGreaterThan>
+		</dynamic>
+		WHERE numero_familia = #numero_familia#;
+	</update>
+	<delete id="EliminarTarjeta">
+		DELETE FROM Tarjeta WHERE numero_familia = #numero_familia#;
+  </delete>
+  <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdTarjeta" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdTarjeta(?) }
+  </procedure>
+</sqlMap>

@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteVerTarjetaFamiliar" language="groovy" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="127"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Title" forecolor="#FFFFFF" fontName="Arial" fontSize="26" isBold="true" pdfFontName="Helvetica-Bold"/>
+	<style name="SubTitle" forecolor="#666666" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<queryString>
+		<![CDATA[SELECT
+  familia.ci,
+  familia.nombres,
+  familia.apellido_paterno,
+  familia.apellido_materno,
+  familia.sexo,
+  familia.fecha_nacimiento,
+  ocupaciones.nombre_ocupacion,
+  actividad_educativa.nombre_actividad_educativa,
+  proyecto.nombre_proyecto,
+  proyecto.departamento,
+  tarjeta.comunidad,
+  tarjeta.barrio,
+  tarjeta.numero_familia,
+  tarjeta.observaciones,
+  tarjeta.numero_proyecto
+FROM
+  public.familia
+  INNER JOIN public.tarjeta
+  ON tarjeta.numero_familia = familia.numero_familia
+  INNER JOIN public.proyecto
+  ON tarjeta.numero_proyecto = proyecto.numero_proyecto
+  LEFT JOIN public.ocupaciones
+  ON ocupaciones.codigo_ocupacion = familia.codigo_ocupacion
+  LEFT JOIN public.actividad_educativa
+  ON actividad_educativa.codigo_actividad_educactiva = familia.codigo_actividad_educactiva]]>
+	</queryString>
+	<field name="ci" class="java.lang.Integer"/>
+	<field name="nombres" class="java.lang.String"/>
+	<field name="apellido_paterno" class="java.lang.String"/>
+	<field name="apellido_materno" class="java.lang.String"/>
+	<field name="sexo" class="java.lang.String"/>
+	<field name="fecha_nacimiento" class="java.sql.Date"/>
+	<field name="nombre_ocupacion" class="java.lang.String"/>
+	<field name="nombre_actividad_educativa" class="java.lang.String"/>
+	<field name="nombre_proyecto" class="java.lang.String"/>
+	<field name="departamento" class="java.lang.String"/>
+	<field name="comunidad" class="java.lang.String"/>
+	<field name="barrio" class="java.lang.String"/>
+	<field name="numero_familia" class="java.lang.Integer"/>
+	<field name="observaciones" class="java.lang.String"/>
+	<field name="numero_proyecto" class="java.lang.Integer"/>
+	<group name="numero_familia">
+		<groupExpression><![CDATA[$F{numero_familia}]]></groupExpression>
+		<groupHeader>
+			<band height="44">
+				<staticText>
+					<reportElement style="Column header" x="0" y="0" width="39" height="10"/>
+					<textElement>
+						<font size="8" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Proyecto :]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="158" y="0" width="56" height="10"/>
+					<textElement>
+						<font size="8" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Departamento]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="299" y="0" width="52" height="10"/>
+					<textElement>
+						<font size="8" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Comunidad]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="0" y="11" width="39" height="10"/>
+					<textElement>
+						<font size="8" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Barrio]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="197" y="11" width="90" height="10"/>
+					<textElement>
+						<font size="8" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Observaciones]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="409" y="0" width="79" height="10"/>
+					<textElement>
+						<font size="8" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Nro Familia]]></text>
+				</staticText>
+				<textField>
+					<reportElement style="Detail" x="39" y="0" width="117" height="10"/>
+					<textElement>
+						<font size="7" isItalic="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{nombre_proyecto}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Detail" x="214" y="0" width="73" height="10"/>
+					<textElement>
+						<font size="7" isItalic="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{departamento}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Detail" x="351" y="0" width="58" height="10"/>
+					<textElement>
+						<font size="7" isItalic="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{comunidad}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Detail" x="39" y="11" width="156" height="10"/>
+					<textElement>
+						<font size="7" isItalic="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{barrio}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Detail" x="287" y="11" width="266" height="10"/>
+					<textElement>
+						<font size="7" isItalic="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{observaciones}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement style="Column header" x="0" y="30" width="39" height="10"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[C.I.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="39" y="30" width="51" height="10"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[Nombres]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="90" y="30" width="87" height="10"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[Paterno]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="177" y="30" width="97" height="10"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[Materno]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="274" y="30" width="39" height="10"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[Sexo]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="313" y="30" width="61" height="10"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[Fecha Nac.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="374" y="30" width="92" height="10"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[Ocupacion]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="Column header" x="466" y="30" width="89" height="10"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<text><![CDATA[Actividad Educacional]]></text>
+				</staticText>
+				<line>
+					<reportElement positionType="FixRelativeToBottom" x="3" y="41" width="555" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineColor="#999999"/>
+					</graphicElement>
+				</line>
+				<line>
+					<reportElement positionType="FixRelativeToBottom" x="3" y="28" width="555" height="1"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineColor="#999999"/>
+					</graphicElement>
+				</line>
+				<textField pattern="" isBlankWhenNull="false">
+					<reportElement mode="Transparent" x="488" y="0" width="62" height="10" forecolor="#000000" backcolor="#FFFFFF"/>
+					<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" lineSpacing="Single" markup="none">
+						<font fontName="Arial" size="7" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					</textElement>
+					<textFieldExpression class="java.lang.Integer"><![CDATA[$F{numero_familia}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="26"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="71" splitType="Stretch">
+			<staticText>
+				<reportElement style="SubTitle" x="122" y="35" width="311" height="22" forecolor="#000000"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Tarjeta Familiar - Miembros]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="462" y="46" width="86" height="14"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="" style="SubTitle" mode="Transparent" x="195" y="11" width="179" height="22"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="12" isBold="true" pdfFontName="Times-Roman"/>
+				</textElement>
+				<text><![CDATA[Proyecto Nuevo Amanecer]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="488" y="21" width="59" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[URO-Tarija]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="491" y="6" width="56" height="13"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[CCF-BOLIVIA]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="66" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="2.0" lineStyle="Double"/>
+				</graphicElement>
+			</line>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="31" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="30" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="10" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement style="Detail" x="0" y="0" width="39" height="10"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Integer"><![CDATA[$F{ci}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Detail" x="39" y="0" width="51" height="10"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{nombres}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Detail" x="90" y="0" width="87" height="10"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{apellido_paterno}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Detail" x="177" y="0" width="97" height="10"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{apellido_materno}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Detail" x="274" y="0" width="39" height="10"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{sexo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Detail" x="313" y="0" width="61" height="10"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[$F{fecha_nacimiento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Detail" x="374" y="0" width="92" height="10"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{nombre_ocupacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Detail" x="466" y="0" width="89" height="10"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{nombre_actividad_educativa}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="3" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement style="Column header" x="433" y="0" width="80" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement style="Column header" x="513" y="0" width="40" height="20"/>
+				<textElement>
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement style="Column header" x="0" y="0" width="197" height="20"/>
+				<textElement>
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

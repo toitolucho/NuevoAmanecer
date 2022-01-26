@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Vacunas">
+
+    <sql id="PropertiesVacunas">
+		SELECT fecha_vacuna, bcg, antipolio_i, antipolio_1a, antipolio_2a, antipolio_3a, 
+		antipolio_refuerzo, pentavalente_1a, pentavalente_2a, pentavalente_3a, 
+		pentavalente_ref, sarampion, numero_caso
+		FROM vacuna
+
+    </sql>
+
+	<select id="ObtenerVacunas" resultClass="Vacunas">
+		<include refid="PropertiesVacunas" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="fecha_vacuna" prepend="AND">
+				<!-- fecha_vacuna = #fecha_vacuna# -->
+				DATE_PART('YEAR', fecha_vacuna) = DATE_PART('YEAR', #fecha_vacuna#::date)
+			</isNotNull>
+			<isGreaterThan property="numero_caso" compareValue="0" prepend="AND">
+				numero_caso = #numero_caso#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY fecha_vacuna ASC
+	</select>
+	
+	<select id="BuscarVacunas" resultClass="Vacunas">
+		<include refid="PropertiesVacunas" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				cast(numero_caso as char(100)) like #keywordList[]# OR
+				to_char(fecha_vacuna,'YYYY-MM-DD') like
+				trim(replace(#keywordList[]#,'%',' '))
+		</iterate>
+		</dynamic>
+		ORDER BY fecha_vacuna ASC
+	</select>
+	
+	<!--
+		select id="BuscarVacunas" resultMap="resultado"> <include
+		refid="PropertiesVacunas"/> <dynamic prepend="WHERE"> <iterate
+		property="keywordList" open="(" close=")" conjunction="OR"> m.idmenu
+		like #keywordList[]# OR m.idpadre like #keywordList[]# OR
+		pr.idgrupomenu like #keywordList[]# OR lower(m.descripcion) like
+		#keywordList[]# OR lower(pr.descripcion) like #keywordList[]#
+		</iterate> </dynamic> ORDER BY m.idmenu ASC </select
+	-->
+
+	<!--
+		<select id="VerificarIdVacunas" resultClass="java.lang.Integer"> SELECT
+		count(idVacunas) FROM Vacunass WHERE idVacunas = #idVacunas# </select>
+	-->
+
+
+	<select id="VerificarIdVacunas" resultClass="java.lang.Integer">
+		SELECT count(fecha_vacuna)
+		FROM vacuna
+		WHERE fecha_vacuna = #fecha_vacuna#
+		and numero_caso=#numero_caso#;
+  </select>
+  
+  <select id="VerificarExistenciaGestionVacunas" resultClass="java.lang.Integer">
+		SELECT count(fecha_vacuna)
+		FROM vacuna
+		WHERE Numero_Caso = #numero_caso#
+		AND EXTRACT(YEAR FROM fecha_vacuna) = EXTRACT(YEAR FROM now())
+  </select>
+
+	<select id="VerificarExistenciaDescripcionVacunas" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM vacuna
+		WHERE fecha_vacuna = #fecha_vacuna#
+  </select>
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarVacunas" parameterClass="Vacunas">
+		INSERT INTO vacuna(
+            fecha_vacuna, bcg, antipolio_i, antipolio_1a, antipolio_2a, antipolio_3a, 
+            antipolio_refuerzo, pentavalente_1a, pentavalente_2a, pentavalente_3a, 
+            pentavalente_ref, sarampion, numero_caso)
+		VALUES(now(), #bcg#, #antipolio_i#, #antipolio_1a#, #antipolio_2a#, #antipolio_3a#, 
+            #antipolio_refuerzo#, #pentavalente_1a#, #pentavalente_2a#, #pentavalente_3a#, 
+            #pentavalente_ref#, #sarampion#, #numero_caso#);
+  </insert>
+
+	<update id="ModificarVacunas" parameterClass="Vacunas">
+		UPDATE vacuna
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="bcg">bcg=#bcg#</isNotNull>
+			<isNotNull prepend="," property="antipolio_i">antipolio_i=#antipolio_i#</isNotNull>
+			<isNotNull prepend="," property="antipolio_1a">antipolio_1a=#antipolio_1a#</isNotNull>
+			<isNotNull prepend="," property="antipolio_2a">antipolio_2a=#antipolio_2a#</isNotNull>
+			<isNotNull prepend="," property="antipolio_3a">antipolio_3a=#antipolio_3a#</isNotNull>
+			<isNotNull prepend="," property="antipolio_refuerzo">antipolio_refuerzo=#antipolio_refuerzo#</isNotNull>
+			<isNotNull prepend="," property="pentavalente_1a">pentavalente_1a=#pentavalente_1a#</isNotNull>
+			<isNotNull prepend="," property="pentavalente_2a">pentavalente_2a=#pentavalente_2a#</isNotNull>
+			<isNotNull prepend="," property="pentavalente_3a">pentavalente_3a=#pentavalente_3a#</isNotNull>
+			<isNotNull prepend="," property="pentavalente_ref">pentavalente_ref=#pentavalente_ref#</isNotNull>
+			<isNotNull prepend="," property="sarampion">sarampion=#sarampion#</isNotNull>
+			<isNotNull prepend="," property="numero_caso">numero_caso=#numero_caso#</isNotNull>
+		</dynamic>
+		WHERE DATE_PART('YEAR', fecha_vacuna) = DATE_PART('YEAR', #fecha_vacuna#::date)
+		and numero_caso=#numero_caso#;
+	</update>
+    <delete id="EliminarVacunas">
+		DELETE FROM vacuna 
+		WHERE fecha_vacuna = #fecha_vacuna#
+		and numero_caso=#numero_caso#;
+  </delete>
+</sqlMap>

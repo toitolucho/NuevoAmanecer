@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Encargados">
+
+	<sql id="PropertiesEncargados">
+		SELECT ci, apellido_paterno, apellido_materno, nombres, profesion, sexo, 
+		edad, telefono, domicilio
+		FROM encargado
+  </sql>
+
+	<select id="ObtenerEncargados" resultClass="Encargados">
+		<include refid="PropertiesEncargados" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="ci">
+				 ci = #ci#
+		</isNotNull>
+		</dynamic>
+		ORDER BY apellido_paterno ASC
+	</select>
+
+	<select id="VerificarIdEncargados" resultClass="java.lang.Integer">
+		SELECT count(ci)
+		FROM Encargado
+		WHERE ci = #ci#;
+  </select>
+
+   <select id="VerificarExistenciaDescripcionEncargados" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Encargados
+		WHERE UPPER(TRIM(apellido_paterno) || RTRIM(apellido_materno) || RTRIM(nombres)) = UPPER(TRIM(#apellido_paterno#) || RTRIM(#apellido_materno#) || RTRIM(#nombres#))
+  </select> 
+
+   <select id="BuscarEncargados" resultClass="Encargados">
+      <include refid="PropertiesEncargados" />
+      <dynamic prepend="WHERE">
+		  <iterate property="keywordList" open="(" close=")" conjunction="OR">
+			cast(ci as char(100)) like #keywordList[]# OR
+			UPPER(apellido_paterno) like UPPER(#keywordList[]#) OR
+			UPPER(apellido_materno) like UPPER(#keywordList[]#) OR
+			UPPER(nombres) like UPPER(#keywordList[]#)
+		  </iterate>
+		  <isGreaterThan property="filtroEntero" compareValue="0" prepend="AND">
+				And ci not in
+				(SELECT ci 
+				FROM imparte
+				WHERE codigo_programa = #filtroEntero#)
+			</isGreaterThan>
+    </dynamic>
+    ORDER BY apellido_paterno ASC
+  </select>
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarEncargados" parameterClass="Encargados">
+		INSERT INTO encargado(ci, apellido_paterno, apellido_materno, nombres, profesion, sexo, 
+            edad, telefono, domicilio)
+		VALUES(#ci#, UPPER(#apellido_paterno#), UPPER(#apellido_materno#), UPPER(#nombres#), #profesion#, #sexo#, 
+            #edad#, #telefono#, #domicilio#)
+  </insert>
+
+	<update id="ModificarEncargados" parameterClass="Encargados">
+		UPDATE encargado
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="apellido_paterno">apellido_paterno=UPPER(#apellido_paterno#)</isNotNull>
+			<isNotNull prepend="," property="apellido_materno">apellido_materno=UPPER(#apellido_materno#)</isNotNull>
+			<isNotNull prepend="," property="nombres">nombres=UPPER(#nombres#)</isNotNull>			
+			<isNotNull prepend="," property="profesion">profesion=#profesion#</isNotNull>
+			<isNotNull prepend="," property="sexo">sexo=#sexo#</isNotNull>
+			<isNotNull prepend="," property="edad">edad=#edad#</isNotNull>
+			<isNotNull prepend="," property="telefono">telefono=#telefono#</isNotNull>
+			<isNotNull prepend="," property="domicilio">domicilio=#domicilio#</isNotNull>			
+		</dynamic>
+		WHERE ci = #ci#;
+	</update>
+	<delete id="EliminarEncargados">
+		DELETE FROM encargado WHERE ci = #ci#;
+  </delete>
+   <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdEncargados" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdEncargados(?) }
+  </procedure> 
+</sqlMap>

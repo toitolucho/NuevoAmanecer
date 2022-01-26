@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Participa">
+
+	<sql id="PropertiesParticipa">
+	SELECT 
+	  participa.codigo_persona, 
+	  participa.codigo_programa,
+	  familia.codigo_persona, 
+	  familia.ci, 
+	  familia.nombres, 
+	  familia.apellido_paterno, 
+	  familia.apellido_materno, 
+	  familia.parentesco, 
+	  familia.sexo, 
+	  afiliado.numero_caso, 
+	  afiliado.nombre_corto, 
+	  afiliado.tipo	  
+	FROM 
+	  public.familia
+	  INNER JOIN public.afiliado
+	  ON familia.codigo_persona = afiliado.codigo_persona
+	  INNER JOIN public.participa
+	  ON afiliado.codigo_persona = participa.codigo_persona
+
+  </sql>
+	
+	<resultMap id="listaParticipantes" class="Participa">
+		<result property="codigo_persona" column="codigo_persona" />
+		<result property="codigo_programa" column="codigo_programa" />
+		<result property="afiliado.ci" column="ci" />
+		<result property="afiliado.nombres" column="nombres" />
+		<result property="afiliado.apellido_paterno" column="apellido_paterno" />
+		<result property="afiliado.apellido_materno" column="apellido_materno" />
+		<result property="afiliado.parentesco" column="parentesco" />
+		<result property="afiliado.sexo" column="sexo" />
+		<result property="afiliado.numero_caso" column="numero_caso" />
+		<result property="afiliado.nombre_corto" column="nombre_corto" />
+		<result property="afiliado.tipo" column="tipo" />
+		<result property="afiliado.codigo_persona" column="codigo_persona" />
+	</resultMap>
+	
+	<select id="ObtenerParticipa" resultMap="listaParticipantes">
+		<include refid="PropertiesParticipa" />
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="codigo_persona" compareValue="0" prepend="AND">
+				familia.codigo_persona = #codigo_persona#
+			</isGreaterThan>			
+			<isGreaterThan property="codigo_programa" compareValue="0" prepend="AND">
+				participa.codigo_programa = #codigo_programa#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY familia.apellido_paterno ASC
+	</select>
+
+	<select id="BuscarParticipa" resultMap="listaParticipantes">
+		<include refid="PropertiesParticipa" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">								
+				cast(participa.codigo_programa as char(100)) like #keywordList[]# OR
+				cast(numero_caso as char(100)) like #keywordList[]# OR				
+				lower(nombres) like lower(#keywordList[]#) OR
+				lower(apellido_paterno) like lower(#keywordList[]#) OR
+				lower(apellido_materno) like lower(#keywordList[]#)
+		</iterate>
+		</dynamic>
+		ORDER BY familia.apellido_paterno ASC
+	</select>
+	
+	<select id="VerificarIdParticipa" resultClass="java.lang.Integer">
+		SELECT count(codigo_persona)
+		FROM Familia
+		WHERE participa.codigo_persona = #codigo_persona#
+		AND participa.codigo_programa = #codigo_programa#;
+  </select>
+
+
+	<insert id="InsertarParticipa" parameterClass="Participa">
+		INSERT INTO participa(
+            codigo_persona, codigo_programa)
+			VALUES (#codigo_persona#, #codigo_programa#);
+
+  </insert>
+
+	<update id="ModificarParticipa" parameterClass="Participa">
+		UPDATE participa
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="codigo_persona">codigo_persona=#codigo_persona#</isNotNull>
+			<isNotNull prepend="," property="codigo_programa">codigo_programa=#codigo_programa#</isNotNull>			
+		</dynamic>
+		WHERE participa.codigo_persona = #codigo_persona#
+		AND participa.codigo_programa = #codigo_programa#;		
+	</update>
+	<delete id="EliminarParticipa">
+		DELETE FROM participa 
+		WHERE participa.codigo_persona = #codigo_persona#
+		AND participa.codigo_programa = #codigo_programa#;	
+		
+  </delete>  
+</sqlMap>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Correspondencia">
+
+	<sql id="PropertiesCorrespondencia">
+		SELECT 	codigo_correspondencia, es_afiliado_remitente, descripcion, fecha, 
+				tipo, codigo_padrino, numero_caso
+		FROM correspondencia
+	</sql>
+
+	<select id="ObtenerCorrespondencia" resultClass="Correspondencia">
+		<include refid="PropertiesCorrespondencia" />
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="codigo_correspondencia" compareValue="0" prepend="AND">
+				codigo_correspondencia = #codigo_correspondencia#
+			</isGreaterThan>
+			<isNotNull property="fecha" prepend="AND">
+				fecha = #fecha#
+		</isNotNull>
+		</dynamic>
+		ORDER BY fecha ASC
+	</select>
+
+	<select id="VerificarIdCorrespondencia" resultClass="java.lang.Integer">
+		SELECT count(codigo_correspondencia)
+		FROM correspondencia
+		WHERE codigo_correspondencia = #codigo_correspondencia#
+  </select>
+	
+	<select id="BuscarCorrespondencia" resultClass="Correspondencia">
+		<include refid="PropertiesCorrespondencia" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				cast(codigo_correspondencia as char(100)) like #keywordList[]# OR
+				cast(codigo_padrino as char(100)) like #keywordList[]# OR
+				cast(numero_caso as char(100)) like #keywordList[]# OR
+				to_char(fecha,'YYYY-MM-DD') like
+				trim(replace(#keywordList[]#,'%',' '))
+		</iterate>
+		</dynamic>
+		ORDER BY fecha ASC
+	</select>
+<!-- 	<select id="VerificarExistenciaDescripcionCorrespondencia" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Correspondencia
+		WHERE UPPER(TRIM(nombre_Correspondencia)) = UPPER(TRIM(#nombre_Correspondencia#))
+  </select> -->
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarCorrespondencia" parameterClass="Correspondencia">
+		INSERT INTO correspondencia(
+            es_afiliado_remitente, descripcion, fecha, 
+            tipo, codigo_padrino, numero_caso)
+		VALUES(#es_afiliado_remitente#, #descripcion#, now(), 
+            #tipo#, #codigo_padrino#, #numero_caso#)
+  </insert>
+
+	<update id="ModificarCorrespondencia" parameterClass="Correspondencia">
+		UPDATE correspondencia
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="fecha">fecha=#fecha#</isNotNull>
+			<isNotNull prepend="," property="descripcion">descripcion=#descripcion#</isNotNull>
+			<isNotNull prepend="," property="tipo">tipo=#tipo#</isNotNull>			
+		</dynamic>
+		WHERE codigo_correspondencia = #codigo_correspondencia#;		
+	</update>
+	<delete id="EliminarCorrespondencia">
+		DELETE FROM correspondencia
+		WHERE codigo_correspondencia = #codigo_correspondencia#;		
+  </delete>
+   <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdCorrespondencia" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdCorrespondencia(?) }
+  </procedure> 
+</sqlMap>

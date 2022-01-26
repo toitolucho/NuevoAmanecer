@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="EventosVitales">
+
+	<sql id="PropertiesEventosVitales">
+		SELECT codigo_evento_vital, nombre_evento_vital
+		FROM eventos_vitales
+
+  </sql>
+
+	<select id="ObtenerEventosVitales" resultClass="EventosVitales">
+		<include refid="PropertiesEventosVitales" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="codigo_evento_vital">
+				codigo_evento_vital = #codigo_evento_vital#
+		</isNotNull>
+		</dynamic>
+		ORDER BY nombre_evento_vital ASC
+	</select>
+
+	<select id="VerificarIdEventosVitales" resultClass="java.lang.Integer">
+		SELECT count(codigo_evento_vital)
+		FROM eventos_vitales
+		WHERE codigo_evento_vital = #codigo_evento_vital#;
+  </select>
+
+<!-- 	<select id="VerificarExistenciaDescripcionEventosVitales" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM EventosVitales
+		WHERE UPPER(TRIM(nombre_EventosVitales)) = UPPER(TRIM(#nombre_EventosVitales#))
+  </select> -->
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarEventosVitales" parameterClass="EventosVitales">
+		INSERT INTO eventos_vitales( codigo_evento_vital, nombre_evento_vital)
+		VALUES(#codigo_evento_vital#, #nombre_evento_vital#)
+  </insert>
+
+	<update id="ModificarEventosVitales" parameterClass="EventosVitales">
+		UPDATE eventos_vitales
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nombre_evento_vital">nombre_evento_vital=#nombre_evento_vital#</isNotNull>
+		</dynamic>
+		WHERE codigo_evento_vital = #codigo_evento_vital#;
+	</update>
+	<delete id="EliminarEventosVitales">
+		DELETE FROM eventos_vitales 
+		WHERE codigo_evento_vital = #codigo_evento_vital#;
+  </delete>
+  <!-- <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdEventosVitales" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdEventosVitales(?) }
+  </procedure> -->
+</sqlMap>

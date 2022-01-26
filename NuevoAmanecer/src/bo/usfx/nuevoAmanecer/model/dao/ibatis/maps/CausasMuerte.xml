@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="CausasMuerte">
+
+	<sql id="PropertiesCausasMuerte">
+		SELECT codigo_causa_muerte, nommbre_causa_muerte
+		FROM causas_muerte
+
+  </sql>
+
+	<select id="ObtenerCausasMuerte" resultClass="CausasMuerte">
+		<include refid="PropertiesCausasMuerte" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="codigo_causa_muerte">
+				codigo_causa_muerte = #codigo_causa_muerte#
+		</isNotNull>
+		</dynamic>
+		ORDER BY nommbre_causa_muerte ASC
+	</select>
+
+	<select id="VerificarIdCausasMuerte" resultClass="java.lang.Integer">
+		SELECT count(codigo_causa_muerte)
+		FROM causas_muerte
+		WHERE codigo_causa_muerte = #codigo_causa_muerte#;
+  </select>
+
+<!-- 	<select id="VerificarExistenciaDescripcionCausasMuerte" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM CausasMuerte
+		WHERE UPPER(TRIM(nombre_CausasMuerte)) = UPPER(TRIM(#nombre_CausasMuerte#))
+  </select> -->
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarCausasMuerte" parameterClass="CausasMuerte">
+		INSERT INTO causas_muerte( codigo_causa_muerte, nommbre_causa_muerte)
+		VALUES(#codigo_causa_muerte#, #nommbre_causa_muerte#)
+  </insert>
+
+	<update id="ModificarCausasMuerte" parameterClass="CausasMuerte">
+		UPDATE causas_muerte
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nommbre_causa_muerte">nommbre_causa_muerte=#nommbre_causa_muerte#</isNotNull>
+		</dynamic>
+		WHERE codigo_causa_muerte = #codigo_causa_muerte#;
+	</update>
+	<delete id="EliminarCausasMuerte">
+		DELETE FROM causas_muerte 
+		WHERE codigo_causa_muerte = #codigo_causa_muerte#;
+  </delete>
+  <!-- <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdCausasMuerte" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdCausasMuerte(?) }
+  </procedure> -->
+</sqlMap>

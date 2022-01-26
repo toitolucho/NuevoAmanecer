@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Vacunas2">
+
+    <sql id="PropertiesVacunas2">
+		SELECT codigo_vacuna2, nombre_vacuna2, edad_meses_minima, edad_meses_maxima, descripcion_vacuna2
+		FROM vacuna2
+
+    </sql>
+
+	<select id="ObtenerVacunas2" resultClass="Vacunas2">
+		<include refid="PropertiesVacunas2" />
+		<dynamic prepend="WHERE">			
+			<isGreaterThan property="codigo_vacuna2" compareValue="0" prepend="AND">
+				codigo_vacuna2 = #codigo_vacuna2#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY nombre_vacuna2 ASC
+	</select>
+	
+	<select id="BuscarVacunas2" resultClass="Vacunas2">
+		<include refid="PropertiesVacunas2" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				cast(codigo_vacuna2 as char(100)) like #keywordList[]# OR
+				nombre_vacuna2 like #keywordList[]#
+		</iterate>
+		</dynamic>
+		ORDER BY nombre_vacuna2 ASC
+	</select>
+
+
+	<select id="VerificarIdVacunas2" resultClass="java.lang.Integer">
+		SELECT count(nombre_vacuna2)
+		FROM vacuna2
+		WHERE codigo_vacuna2=#codigo_vacuna2#;
+  </select>
+  
+
+	<select id="VerificarExistenciaDescripcionVacunas2" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM vacuna2
+		WHERE UPPER(nombre_vacuna2) = UPPER(#nombre_vacuna2#)
+  </select>
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarVacunas2" parameterClass="Vacunas2">
+		INSERT INTO vacuna2(
+            nombre_vacuna2, edad_meses_minima, edad_meses_maxima, descripcion_vacuna2)
+		VALUES(#nombre_vacuna2#, #edad_meses_minima#, #edad_meses_maxima#, #descripcion_vacuna2#);
+  </insert>
+
+	<update id="ModificarVacunas2" parameterClass="Vacunas2">
+		UPDATE vacuna2
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nombre_vacuna2">nombre_vacuna2=#nombre_vacuna2#</isNotNull>
+			<isNotNull prepend="," property="edad_meses_minima">edad_meses_minima=#edad_meses_minima#</isNotNull>
+			<isNotNull prepend="," property="edad_meses_maxima">edad_meses_maxima=#edad_meses_maxima#</isNotNull>			
+			<isNotNull prepend="," property="descripcion_vacuna2">descripcion_vacuna2=#descripcion_vacuna2#</isNotNull>			
+		</dynamic>
+		WHERE codigo_vacuna2=#codigo_vacuna2#;
+	</update>
+    <delete id="EliminarVacunas2">
+		DELETE FROM vacuna2 
+		WHERE nombre_vacuna2 = #nombre_vacuna2#
+		and codigo_vacuna2=#codigo_vacuna2#;
+  </delete>
+  
+  <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdVacunas2" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdVacuna2(?) }
+  </procedure> 
+</sqlMap>

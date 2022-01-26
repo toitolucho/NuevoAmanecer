@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="ActividadEducativa">
+
+	<sql id="PropertiesActividadEducativa">
+		SELECT codigo_actividad_educactiva, nombre_actividad_educativa
+		FROM actividad_educativa		
+  </sql>
+
+	<select id="ObtenerActividadEducativa" resultClass="ActividadEducativa">
+		<include refid="PropertiesActividadEducativa" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="codigo_actividad_educactiva">
+				codigo_actividad_educactiva = #codigo_actividad_educactiva#
+		</isNotNull>
+		</dynamic>
+		ORDER BY nombre_actividad_educativa ASC
+	</select>
+
+	<select id="VerificarIdActividadEducativa" resultClass="java.lang.Integer">
+		SELECT count(codigo_actividad_educactiva)
+		FROM actividad_educativa
+		WHERE codigo_actividad_educactiva = #codigo_actividad_educactiva#;
+  </select>
+
+<!-- 	<select id="VerificarExistenciaDescripcionActividadEducativa" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM ActividadEducativa
+		WHERE UPPER(TRIM(nombre_ActividadEducativa)) = UPPER(TRIM(#nombre_ActividadEducativa#))
+  </select> -->
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarActividadEducativa" parameterClass="ActividadEducativa">
+		INSERT INTO actividad_educativa( codigo_actividad_educactiva, nombre_actividad_educativa)
+		VALUES(#codigo_actividad_educactiva#, #nombre_actividad_educativa#)
+  </insert>
+
+	<update id="ModificarActividadEducativa" parameterClass="ActividadEducativa">
+		UPDATE actividad_educativa
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nombre_actividad_educativa">nombre_actividad_educativa=#nombre_actividad_educativa#</isNotNull>
+		</dynamic>
+		WHERE codigo_actividad_educactiva = #codigo_actividad_educactiva#;
+	</update>
+	<delete id="EliminarActividadEducativa">
+		DELETE FROM actividad_educativa 
+		WHERE codigo_actividad_educactiva = #codigo_actividad_educactiva#;
+  </delete>
+  <!-- <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdActividadEducativa" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdActividadEducativa(?) }
+  </procedure> -->
+</sqlMap>

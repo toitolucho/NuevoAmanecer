@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SistemaFormulariosPermisosUsuarios">
+
+	<sql id="PropertiesSistemaFormulariosPermisosUsuarios">
+		SELECT 	codigo_usuario, sistema_formularios_permisos_usuarios.codigo_formulario, permitir_insertar, permitir_editar, 
+				   pemitir_eliminar, permitir_navegar, permitir_reportes, permitir_anular,
+				    nombre_formulario, estado, descripcion
+		FROM sistema_formularios_permisos_usuarios
+		inner join sistema_formularios
+		on sistema_formularios.codigo_formulario = sistema_formularios_permisos_usuarios.codigo_formulario
+	</sql>
+
+
+	<resultMap id="listaSistemaFormulariosPermisosUsuarios" class="SistemaFormulariosPermisosUsuarios">
+		<result property="codigo_usuario" column="codigo_usuario" />
+		<result property="codigo_formulario" column="codigo_formulario" />
+		<result property="permitir_insertar" column="permitir_insertar" />
+		<result property="permitir_editar" column="permitir_editar" />
+		<result property="pemitir_eliminar" column="pemitir_eliminar" />
+		<result property="permitir_navegar" column="permitir_navegar" />
+		<result property="permitir_reportes" column="permitir_reportes" />
+		<result property="permitir_anular" column="permitir_anular" />		
+		<result property="sistemaFormulario.codigo_formulario" column="codigo_formulario" />
+		<result property="sistemaFormulario.nombre_formulario" column="nombre_formulario" />
+		<result property="sistemaFormulario.estado" column="estado" />
+		<result property="sistemaFormulario.descripcion" column="descripcion" />		
+	</resultMap>
+
+	<select id="ObtenerSistemaFormulariosPermisosUsuarios" resultMap="listaSistemaFormulariosPermisosUsuarios">
+		<include refid="PropertiesSistemaFormulariosPermisosUsuarios" />		
+		<dynamic prepend="WHERE">
+			<isNotNull property="codigo_usuario" prepend ="AND">
+				codigo_usuario = #codigo_usuario#
+			</isNotNull>
+			<isNotNull property="idSistemaFormulariosPermisosUsuarios" prepend ="AND">
+				codigo_formulario = #codigo_formulario#
+			</isNotNull>			
+		</dynamic>
+		ORDER BY nombre_formulario ASC
+	</select>
+
+	<select id="BuscarSistemaFormulariosPermisosUsuarios" resultMap="listaSistemaFormulariosPermisosUsuarios">
+		<include refid="PropertiesSistemaFormulariosPermisosUsuarios" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				lower(nombre_formulario) like lower(#keywordList[]#) OR
+				lower(descripcion) like lower(#keywordList[]#)				 
+		</iterate>
+		</dynamic>
+		ORDER BY nombre_formulario ASC
+	</select>
+
+
+
+	<select id="VerificarIdSistemaFormulariosPermisosUsuarios" resultClass="java.lang.Integer">
+		SELECT count(codigo_formulario)
+		FROM sistema_formularios_permisos_usuarios
+		WHERE codigo_formulario = #codigo_formulario#
+		AND codigo_usuario = #codigo_usuario#;
+  </select>
+
+
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarSistemaFormulariosPermisosUsuarios" parameterClass="SistemaFormulariosPermisosUsuarios">
+		INSERT INTO sistema_formularios_permisos_usuarios(
+            codigo_usuario, 
+			codigo_formulario, 
+			permitir_insertar, 
+			permitir_editar, 
+            pemitir_eliminar, 
+			permitir_navegar, 
+			permitir_reportes, 
+			permitir_anular
+           )
+		VALUES(
+			#codigo_usuario#,			
+			#codigo_formulario#,
+			#permitir_insertar#,
+			#permitir_editar#,
+			#pemitir_eliminar#,
+			#permitir_navegar#,
+			#permitir_reportes#,
+			#permitir_anular#
+		);
+		
+  </insert>
+
+	<update id="ModificarSistemaFormulariosPermisosUsuarios" parameterClass="SistemaFormulariosPermisosUsuarios">
+		UPDATE sistema_formularios_permisos_usuarios
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="permitir_insertar">permitir_insertar=#permitir_insertar#</isNotNull>
+			<isNotNull prepend="," property="permitir_editar">permitir_editar=#permitir_editar#</isNotNull>
+			<isNotNull prepend="," property="pemitir_eliminar">pemitir_eliminar=#pemitir_eliminar#</isNotNull>
+			<isNotNull prepend="," property="permitir_navegar">permitir_navegar=#permitir_navegar#</isNotNull>
+			<isNotNull prepend="," property="permitir_reportes">permitir_reportes=#permitir_reportes#</isNotNull>
+			<isNotNull prepend="," property="permitir_anular">permitir_anular=#permitir_anular#</isNotNull>			
+		</dynamic>
+		WHERE codigo_formulario = #codigo_formulario#
+		AND codigo_usuario = #codigo_usuario#;
+	</update>
+	<delete id="EliminarSistemaFormulariosPermisosUsuarios">
+		DELETE FROM sistema_formularios_permisos_usuarios 
+		WHERE codigo_formulario = #codigo_formulario#
+		AND codigo_usuario = #codigo_usuario#;
+	</delete>
+	
+</sqlMap>

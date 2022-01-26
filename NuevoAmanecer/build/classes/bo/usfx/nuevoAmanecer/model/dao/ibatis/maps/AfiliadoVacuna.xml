@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="AfiliadoVacuna">
+
+    <sql id="PropertiesAfiliadoVacuna">
+		SELECT 
+		  afiliado_vacunas.codigo_persona, 
+		  afiliado_vacunas.codigo_vacuna2, 
+		  afiliado_vacunas.fecha_vacuna2, 
+		  afiliado_vacunas.observaciones, 
+		  vacuna2.nombre_vacuna2, 
+		  vacuna2.edad_meses_minima,
+		  vacuna2.edad_meses_maxima,
+		  vacuna2.descripcion_vacuna2
+		FROM 
+		  public.afiliado_vacunas
+		INNER JOIN
+		  public.vacuna2
+		ON
+		  afiliado_vacunas.codigo_vacuna2 = vacuna2.codigo_vacuna2
+    </sql>
+	
+	<resultMap id="listaAfiliadoVacuna" class="AfiliadoVacuna">
+		<result property="codigo_persona" column="codigo_persona" />
+		<result property="codigo_vacuna2" column="codigo_vacuna2" />
+		<result property="fecha_vacuna2" column="fecha_vacuna2" />
+		<result property="observaciones" column="observaciones" />
+		<result property="vacuna.codigo_vacuna2" column="codigo_vacuna2" />
+		<result property="vacuna.nombre_vacuna2" column="nombre_vacuna2" />
+		<result property="vacuna.edad_meses_minima" column="edad_meses_minima" />
+		<result property="vacuna.edad_meses_maxima" column="edad_meses_maxima" />
+		<result property="vacuna.descripcion_vacuna2" column="descripcion_vacuna2" />
+	</resultMap>
+	
+	<select id="ObtenerAfiliadoVacuna" resultMap="listaAfiliadoVacuna">
+		<include refid="PropertiesAfiliadoVacuna" />
+		<dynamic prepend="WHERE">			
+			<isGreaterThan property="codigo_persona" compareValue="0" prepend="AND">
+				afiliado_vacunas.codigo_persona = #codigo_persona#
+			</isGreaterThan>
+			<isGreaterThan property="codigo_vacuna2" compareValue="0" prepend="AND">
+				afiliado_vacunas.codigo_vacuna2 = #codigo_vacuna2#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY afiliado_vacunas.fecha_vacuna2 ASC
+	</select>
+	
+	<select id="BuscarAfiliadoVacuna" resultMap="listaAfiliadoVacuna">
+		<include refid="PropertiesAfiliadoVacuna" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				cast(afiliado_vacunas.codigo_persona as char(100)) like #keywordList[]# OR
+				cast(afiliado_vacunas.codigo_vacuna2 as char(100)) like #keywordList[]# OR
+				vacuna2.nombre_vacuna2 like #keywordList[]#
+		</iterate>
+		</dynamic>
+		ORDER BY afiliado_vacunas.fecha_vacuna2 ASC
+	</select>
+
+
+	<select id="VerificarIdAfiliadoVacuna" resultClass="java.lang.Integer">
+		SELECT count(codigo_persona)
+		FROM afiliado_vacunas
+		WHERE codigo_persona = #codigo_persona#
+		AND codigo_vacuna2=#codigo_vacuna2#
+		<!-- AND fecha_vacuna2 = #fecha_vacuna2#; -->
+  </select>
+  
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarAfiliadoVacuna" parameterClass="AfiliadoVacuna">
+		INSERT INTO afiliado_vacunas(
+            codigo_persona, codigo_vacuna2, fecha_vacuna2, observaciones)
+		VALUES(#codigo_persona#, #codigo_vacuna2#, #fecha_vacuna2#, #observaciones#);
+  </insert>
+
+	<update id="ModificarAfiliadoVacuna" parameterClass="AfiliadoVacuna">
+		UPDATE afiliado_vacunas
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="codigo_vacuna2">codigo_vacuna2=#codigo_vacuna2#</isNotNull>
+			<isNotNull prepend="," property="observaciones">observaciones=#observaciones#</isNotNull>			
+		</dynamic>
+		WHERE codigo_persona = #codigo_persona#
+		AND codigo_vacuna2=#codigo_vacuna2#
+		AND fecha_vacuna2 = #fecha_vacuna2#;
+	</update>
+    <delete id="EliminarAfiliadoVacuna">
+		DELETE FROM afiliado_vacunas 
+		WHERE codigo_persona = #codigo_persona#
+		AND codigo_vacuna2=#codigo_vacuna2#
+		AND fecha_vacuna2 = #fecha_vacuna2#
+  </delete>
+</sqlMap>

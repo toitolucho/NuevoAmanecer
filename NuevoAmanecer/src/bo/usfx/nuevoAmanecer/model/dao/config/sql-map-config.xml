@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+	<!--
+		Asegúrate siempre de usar las cabeceras XML correcta como la de
+		arriba!
+	-->
+<sqlMapConfig>
+	<!--
+		El fichero de properties especificado aquí es el lugar donde poner las
+		propiedades (name=value) que se usarán después en este fichero de
+		configuración donde veamos elementos de configuración como por ejemplo
+		”${driver}”. El fichero suele ser relativo al classpath y es opcional.
+	-->
+	<properties resource="bo/usfx/nuevoAmanecer/model/dao/config/project.properties" />
+	<!--
+		Estas propiedades controlan los detalles de configuración de SqlMap,
+		principalmente las relacionadas con la gestión de transacciones. Todas
+		son opcionales (ver Guía del Desarrollador para más información).
+	-->
+	<settings cacheModelsEnabled="true" enhancementEnabled="true"
+		lazyLoadingEnabled="true" maxRequests="32" maxSessions="10"
+		maxTransactions="5" useStatementNamespaces="false" />
+
+	<!--
+		typeAlias permite usar un nombre corto en referencia a un nombre
+		cualificado de una clase
+	-->
+
+
+
+ 	<typeAlias alias="ActividadEducativa" 	type="bo.usfx.nuevoAmanecer.model.domain.ActividadEducativa" />
+	<typeAlias alias="Afiliado" 			type="bo.usfx.nuevoAmanecer.model.domain.Afiliado" />
+	<typeAlias alias="Casos" 				type="bo.usfx.nuevoAmanecer.model.domain.Casos" />
+	<typeAlias alias="CausasMuerte" 		type="bo.usfx.nuevoAmanecer.model.domain.CausasMuerte" />
+	<typeAlias alias="Correspondencia"		type="bo.usfx.nuevoAmanecer.model.domain.Correspondencia" />
+	<typeAlias alias="Eccd" 				type="bo.usfx.nuevoAmanecer.model.domain.Eccd" />
+	<typeAlias alias="Encargados" 			type="bo.usfx.nuevoAmanecer.model.domain.Encargados" />
+	<typeAlias alias="EventosVitales" 		type="bo.usfx.nuevoAmanecer.model.domain.EventosVitales" />
+	<typeAlias alias="Familia" 				type="bo.usfx.nuevoAmanecer.model.domain.Familia" />
+	<typeAlias alias="Familiar" 			type="bo.usfx.nuevoAmanecer.model.domain.Familiar" />
+	<typeAlias alias="Imparte" 				type="bo.usfx.nuevoAmanecer.model.domain.Imparte" />
+	<typeAlias alias="Integra" 				type="bo.usfx.nuevoAmanecer.model.domain.Integra" />
+	<typeAlias alias="Integrantes" 			type="bo.usfx.nuevoAmanecer.model.domain.Integrantes" />
+	<typeAlias alias="Ocupaciones" 			type="bo.usfx.nuevoAmanecer.model.domain.Ocupaciones" />
+	<typeAlias alias="Padrinos" 			type="bo.usfx.nuevoAmanecer.model.domain.Padrinos" />
+	<typeAlias alias="Participa" 			type="bo.usfx.nuevoAmanecer.model.domain.Participa" />
+	<typeAlias alias="Programas" 			type="bo.usfx.nuevoAmanecer.model.domain.Programas" />
+	<typeAlias alias="Proyecto" 			type="bo.usfx.nuevoAmanecer.model.domain.Proyecto" />
+	<typeAlias alias="SaludPublica" 		type="bo.usfx.nuevoAmanecer.model.domain.SaludPublica" />
+	<typeAlias alias="Tarjeta" 				type="bo.usfx.nuevoAmanecer.model.domain.Tarjeta" />
+	<typeAlias alias="Vacunas" 				type="bo.usfx.nuevoAmanecer.model.domain.Vacunas" />
+	<typeAlias alias="Usuarios" 			type="bo.usfx.nuevoAmanecer.model.domain.Usuarios" />
+	<typeAlias alias="SistemaFormularios" 	type="bo.usfx.nuevoAmanecer.model.domain.SistemaFormularios" />
+	<typeAlias alias="SistemaFormulariosPermisosUsuarios" 			type="bo.usfx.nuevoAmanecer.model.domain.SistemaFormulariosPermisosUsuarios" />
+	<typeAlias alias="Cargos" 			type="bo.usfx.nuevoAmanecer.model.domain.Cargo" />
+        <typeAlias alias="SistemaFormulariosPermisosCargos" 			type="bo.usfx.nuevoAmanecer.model.domain.SistemaFormulariosPermisosCargos" />
+        <typeAlias alias="Vacunas2" 			type="bo.usfx.nuevoAmanecer.model.domain.Vacunas2" />
+        <typeAlias alias="AfiliadoVacuna" 			type="bo.usfx.nuevoAmanecer.model.domain.AfiliadoVacuna" />
+	<!--
+		Configura un DataSource que podrá ser usado con SQL Map usando
+		SimpleDataSource. Date cuenta del uso de las propiedades del fichero
+		de recursos de arriba.
+	-->
+	<transactionManager type="JDBC">
+		<dataSource type="SIMPLE">
+			<property name="JDBC.Driver" 			value="${jdbc.driverPgSQLClassName}" />
+			<property name="JDBC.ConnectionURL" 	value="${jdbc.urlPgSQL}" />
+			<property name="JDBC.Username" 			value="${jdbc.usernamePgSQL}" />
+			<property name="JDBC.Password" 			value="${jdbc.passwordPgSQL}" />
+		</dataSource>
+	</transactionManager>
+
+	<!--
+		Identifica todos los ficheros de mapeos XML usados en SQL Map para
+		cargar los mapeos SQL. Date cuenta de los paths son relativos al
+		classpath. Por ahora, solo tenemos uno...
+	-->
+
+ 	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/ActividadEducativa.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/CausasMuerte.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Ocupaciones.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/EventosVitales.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Tarjeta.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Vacunas.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Familia.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Afiliado.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Familiar.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Eccd.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/SaludPublica.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Programas.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Integrantes.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Padrinos.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Proyecto.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Encargados.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Correspondencia.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Participa.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Imparte.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Integra.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Casos.xml" />
+        <sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Cargos.xml" />
+        <sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Usuarios.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/SistemaFormulario.xml" />
+	<sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/SistemaFormularioPermisosUsuario.xml" />
+        <sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/SistemaFormulariosPermisosCargos.xml" />
+        <sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/AfiliadoVacuna.xml" />
+        <sqlMap resource="bo/usfx/nuevoAmanecer/model/dao/ibatis/maps/Vacunas2.xml" />
+	<!--
+	
+		 -->
+ </sqlMapConfig>

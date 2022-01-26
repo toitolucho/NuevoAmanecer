@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SistemaFormularios">
+
+	<sql id="PropertiesSistemaFormularios">
+		SELECT codigo_formulario, nombre_formulario, estado, descripcion
+  		FROM sistema_formularios C
+
+	</sql>
+
+	<select id="ObtenerSistemaFormularios" resultClass="SistemaFormularios">
+		<include refid="PropertiesSistemaFormularios" />		
+		<dynamic prepend="WHERE">
+			<isNotNull property="codigo_formulario">
+				codigo_formulario = #codigo_formulario#
+		</isNotNull>
+		</dynamic>
+		ORDER BY C.nombre_formulario ASC
+	</select>
+
+	<select id="BuscarSistemaFormularios" resultClass="SistemaFormularios">
+		<include refid="PropertiesSistemaFormularios" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				lower(C.nombre_formulario) like lower(#keywordList[]#) OR
+				lower(C.descripcion) like lower(#keywordList[]#)				 
+		</iterate>
+		</dynamic>
+		ORDER BY C.nombre_formulario ASC
+	</select>
+	
+	<select id="ListarXUsuarioSistemaFormularios" parameterClass="java.lang.Integer" resultClass="SistemaFormularios">
+		select * from listar_formularios_por_usuarios(#value#);
+	</select>
+	
+	<select id="VerificarIdSistemaFormularios" resultClass="java.lang.Integer">
+		SELECT count(codigo_formulario)
+		FROM sistema_formularios
+		WHERE codigo_formulario = #codigo_formulario#;
+	</select>
+
+
+	<select id="VerificarExistenciaDescripcionSistemaFormularios" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM sistema_formularios C
+		WHERE UPPER(TRIM(C.nombre_formulario)) = UPPER(TRIM(#nombre_formulario#))
+	</select>
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarSistemaFormularios" parameterClass="SistemaFormularios">
+		INSERT INTO sistema_formularios(            
+			nombre_formulario, 
+			estado, 
+			descripcion
+		)
+		VALUES(
+			#nombre_formulario#,
+			#estado#,
+			#descripcion#
+		);
+		
+	</insert>
+
+	<update id="ModificarSistemaFormularios" parameterClass="SistemaFormularios">
+		UPDATE sistema_formularios
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nombre_formulario">nombre_formulario=#nombre_formulario#</isNotNull>
+			<isNotNull prepend="," property="estado">estado=#estado#</isNotNull>
+			<isNotNull prepend="," property="descripcion">descripcion=#descripcion#</isNotNull>			
+		</dynamic>
+		WHERE codigo_formulario = #codigo_formulario#;
+	</update>
+	<delete id="EliminarSistemaFormularios">
+		DELETE FROM sistema_formularios WHERE codigo_formulario = #codigo_formulario#;
+	</delete>
+
+	<!-- <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="getIdLastSistemaFormularios" parameterMap="parametros"
+		resultClass="int">
+		{ call obtenerUltimoIdCampoDeportivo(?) }
+  </procedure> -->
+</sqlMap>

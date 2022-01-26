@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Imparte">
+
+	<sql id="PropertiesImparte">
+	SELECT 
+	  imparte.ci, 
+	  encargado.apellido_paterno, 
+	  encargado.apellido_materno, 
+	  encargado.nombres, 
+	  encargado.profesion, 
+	  encargado.sexo, 
+	  encargado.edad, 
+	  encargado.telefono, 
+	  encargado.domicilio, 
+	  imparte.codigo_programa
+	FROM 
+	  public.imparte 
+	  INNER JOIN public.encargado
+	  ON imparte.ci = encargado.ci
+
+  </sql>
+	
+	<resultMap id="listaImpartidores" class="Imparte">
+		<result property="ci" column="ci" />
+		<result property="codigo_programa" column="codigo_programa" />
+		<result property="encargado.ci" column="ci" />
+		<result property="encargado.nombres" column="nombres" />
+		<result property="encargado.apellido_paterno" column="apellido_paterno" />
+		<result property="encargado.apellido_materno" column="apellido_materno" />
+		<result property="encargado.profesion" column="profesion" />
+		<result property="encargado.sexo" column="sexo" />
+		<result property="encargado.telefono" column="telefono" />
+		<result property="encargado.domicilio" column="domicilio" />		
+	</resultMap>
+	
+	<select id="ObtenerImparte" resultMap="listaImpartidores">
+		<include refid="PropertiesImparte" />
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="ci" compareValue="0" prepend="AND">
+				imparte.ci = #ci#
+			</isGreaterThan>			
+			<isGreaterThan property="codigo_programa" compareValue="0" prepend="AND">
+				Imparte.codigo_programa = #codigo_programa#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY encargado.apellido_paterno ASC
+	</select>
+
+	<select id="BuscarImparte" resultMap="listaImpartidores">
+		<include refid="PropertiesImparte" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">								
+				cast(Imparte.codigo_programa as char(100)) like #keywordList[]# OR
+<!--				cast(imparte.ci as char(100)) like #keywordList[]# OR				-->
+				lower(nombres) like lower(#keywordList[]#) OR
+				lower(apellido_paterno) like lower(#keywordList[]#) OR
+				lower(apellido_materno) like lower(#keywordList[]#)
+		</iterate>
+		</dynamic>
+		ORDER BY encargado.apellido_paterno ASC
+	</select>
+	
+	<select id="VerificarIdImparte" resultClass="java.lang.Integer">
+		SELECT count(ci)
+		FROM Familia
+		WHERE imparte.ci = #ci#
+		AND Imparte.codigo_programa = #codigo_programa#;
+  </select>
+
+
+	<insert id="InsertarImparte" parameterClass="Imparte">
+		INSERT INTO Imparte(
+            ci, codigo_programa)
+			VALUES (#ci#, #codigo_programa#);
+
+  </insert>
+
+	<update id="ModificarImparte" parameterClass="Imparte">
+		UPDATE Imparte
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="ci">ci=#ci#</isNotNull>
+			<isNotNull prepend="," property="codigo_programa">codigo_programa=#codigo_programa#</isNotNull>			
+		</dynamic>
+		WHERE imparte.ci = #ci#
+		AND Imparte.codigo_programa = #codigo_programa#;		
+	</update>
+	<delete id="EliminarImparte">
+		DELETE FROM Imparte 
+		WHERE imparte.ci = #ci#
+		AND Imparte.codigo_programa = #codigo_programa#;	
+		
+  </delete>  
+</sqlMap>

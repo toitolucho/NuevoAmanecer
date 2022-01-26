@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Integra">
+
+	<sql id="PropertiesIntegra">
+	SELECT 
+	  integra.codigo_programa, 
+	  integra.codigo_integrante, 
+	  integrante.apellido_paterno, 
+	  integrante.apellido_materno, 
+	  integrante.nombres, 
+	  integrante.sexo, 
+	  integrante.edad
+	FROM 
+	  public.integra 
+	  INNER JOIN public.integrante
+	  ON integrante.codigo_integrante = integra.codigo_integrante
+
+  </sql>
+	
+	<resultMap id="listaIntegrantes" class="Integra">
+		<result property="codigo_integrante" column="codigo_integrante" />
+		<result property="codigo_programa" column="codigo_programa" />
+		<result property="integrante.sexo" column="sexo" />
+		<result property="integrante.nombres" column="nombres" />
+		<result property="integrante.apellido_paterno" column="apellido_paterno" />
+		<result property="integrante.apellido_materno" column="apellido_materno" />
+		<result property="integrante.edad" column="edad" />
+		<result property="integrante.codigo_integrante" column="codigo_integrante" />		
+	</resultMap>
+	
+	<select id="ObtenerIntegra" resultMap="listaIntegrantes">
+		<include refid="PropertiesIntegra" />
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="codigo_integrante" compareValue="0" prepend="AND">
+				integra.codigo_integrante = #codigo_integrante#
+			</isGreaterThan>			
+			<isGreaterThan property="codigo_programa" compareValue="0" prepend="AND">
+				Integra.codigo_programa = #codigo_programa#
+			</isGreaterThan>
+		</dynamic>
+		ORDER BY integrante.apellido_paterno ASC
+	</select>
+
+	<select id="BuscarIntegra" resultMap="listaIntegrantes">
+		<include refid="PropertiesIntegra" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">								
+				cast(Integra.codigo_programa as char(100)) like #keywordList[]# OR
+				cast(integra.codigo_integrante as char(100)) like #keywordList[]# OR				
+				lower(nombres) like lower(#keywordList[]#) OR
+				lower(apellido_paterno) like lower(#keywordList[]#) OR
+				lower(apellido_materno) like lower(#keywordList[]#)
+		</iterate>
+		</dynamic>
+		ORDER BY integrante.apellido_paterno ASC
+	</select>
+	
+	<select id="VerificarIdIntegra" resultClass="java.lang.Integer">
+		SELECT count(codigo_integrante)
+		FROM Familia
+		WHERE Integra.codigo_integrante = #codigo_integrante#
+		AND Integra.codigo_programa = #codigo_programa#;
+  </select>
+
+
+	<insert id="InsertarIntegra" parameterClass="Integra">
+		INSERT INTO Integra(
+            codigo_integrante, codigo_programa)
+			VALUES (#codigo_integrante#, #codigo_programa#);
+
+  </insert>
+
+	<update id="ModificarIntegra" parameterClass="Integra">
+		UPDATE Integra
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="codigo_integrante">codigo_integrante=#codigo_integrante#</isNotNull>
+			<isNotNull prepend="," property="codigo_programa">codigo_programa=#codigo_programa#</isNotNull>			
+		</dynamic>
+		WHERE Integra.codigo_integrante = #codigo_integrante#
+		AND Integra.codigo_programa = #codigo_programa#;		
+	</update>
+	<delete id="EliminarIntegra">
+		DELETE FROM Integra 
+		WHERE Integra.codigo_integrante = #codigo_integrante#
+		AND Integra.codigo_programa = #codigo_programa#;	
+		
+  </delete>  
+</sqlMap>

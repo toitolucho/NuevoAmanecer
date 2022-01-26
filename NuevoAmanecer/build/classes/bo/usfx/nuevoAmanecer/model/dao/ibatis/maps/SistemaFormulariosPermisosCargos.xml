@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SistemaFormulariosPermisosCargos">
+
+	<insert id="InsertarSistemaFormulariosPermisosCargos" parameterClass="SistemaFormulariosPermisosCargos">
+	
+		DELETE FROM sistema_formularios_permisos_usuarios
+		WHERE codigo_formulario IN
+		(
+			SELECT 
+			  sistema_formularios_permisos_usuarios.codigo_formulario
+			FROM 
+			  public.usuarios, 			  
+			  public.sistema_formularios_permisos_usuarios
+			WHERE 			  
+			  sistema_formularios_permisos_usuarios.codigo_usuario = usuarios.codigo_usuario
+			  AND TRIM(usuarios.codigo_tipo_usuario) = TRIM(#codigo_cargo#)
+			  AND sistema_formularios_permisos_usuarios.codigo_formulario = #codigo_formulario#
+		);
+		
+		INSERT INTO sistema_formularios_permisos_cargo(
+            codigo_cargo, 
+			codigo_formulario, 
+			permitir_insertar, 
+			permitir_editar, 
+            pemitir_eliminar, 
+			permitir_navegar, 
+			permitir_reportes, 
+			permitir_anular
+           )
+		VALUES(
+			#codigo_cargo#,			
+			#codigo_formulario#,
+			#permitir_insertar#,
+			#permitir_editar#,
+			#pemitir_eliminar#,
+			#permitir_navegar#,
+			#permitir_reportes#,
+			#permitir_anular#
+		);
+		
+		INSERT INTO sistema_formularios_permisos_usuarios
+		SELECT 
+			usuarios.codigo_usuario,			
+			#codigo_formulario#,
+			#permitir_insertar#,
+			#permitir_editar#,
+			#pemitir_eliminar#,
+			#permitir_navegar#,
+			#permitir_reportes#,
+			#permitir_anular#
+		FROM 
+		  public.cargo
+		INNER JOIN
+		  public.usuarios
+		ON
+		  cargo.codigo_cargo = usuarios.codigo_tipo_usuario
+		WHERE
+		  cargo.codigo_cargo = #codigo_cargo#;
+
+		
+		
+		
+  </insert>
+
+	<update id="ModificarSistemaFormulariosPermisosCargos" parameterClass="SistemaFormulariosPermisosCargos">
+		UPDATE sistema_formularios_permisos_cargo
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="permitir_insertar">permitir_insertar=#permitir_insertar#</isNotNull>
+			<isNotNull prepend="," property="permitir_editar">permitir_editar=#permitir_editar#</isNotNull>
+			<isNotNull prepend="," property="pemitir_eliminar">pemitir_eliminar=#pemitir_eliminar#</isNotNull>
+			<isNotNull prepend="," property="permitir_navegar">permitir_navegar=#permitir_navegar#</isNotNull>
+			<isNotNull prepend="," property="permitir_reportes">permitir_reportes=#permitir_reportes#</isNotNull>
+			<isNotNull prepend="," property="permitir_anular">permitir_anular=#permitir_anular#</isNotNull>			
+		</dynamic>
+		WHERE codigo_formulario = #codigo_formulario#
+		AND codigo_cargo = #codigo_cargo#;
+	</update>
+	<delete id="EliminarSistemaFormulariosPermisosCargos">
+		DELETE FROM sistema_formularios_permisos_usuarios
+		WHERE codigo_usuario IN
+		(
+			SELECT 
+			  usuarios.codigo_usuario
+			FROM 
+			  public.usuarios, 			  
+			  public.sistema_formularios_permisos_usuarios
+			WHERE 			  
+			  sistema_formularios_permisos_usuarios.codigo_usuario = usuarios.codigo_usuario			
+			  AND TRIM(usuarios.codigo_tipo_usuario) = TRIM(#codigo_cargo#)
+		);
+			
+		DELETE FROM sistema_formularios_permisos_cargo 
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="codigo_formulario" compareValue="0" prepend="AND">
+				codigo_formulario = #codigo_formulario#
+			</isGreaterThan>
+			<isNotNull property="codigo_cargo" prepend="AND">
+				codigo_cargo = #codigo_cargo#
+			</isNotNull>				
+		</dynamic>		
+	</delete>
+	
+</sqlMap>

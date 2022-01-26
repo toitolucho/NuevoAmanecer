@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Proyecto">
+
+	<sql id="PropertiesProyecto">
+		SELECT numero_proyecto, nombre_proyecto, departamento, provincia_canton, 
+		localidad
+		FROM proyecto
+
+  </sql>
+
+	<select id="ObtenerProyecto" resultClass="Proyecto">
+		<include refid="PropertiesProyecto" />
+		<dynamic prepend="WHERE">
+			<isNotNull property="numero_proyecto">
+				numero_proyecto = #numero_proyecto#
+		</isNotNull>
+		</dynamic>
+		ORDER BY nombre_proyecto ASC
+	</select>
+
+	<select id="VerificarIdProyecto" resultClass="java.lang.Integer">
+		SELECT count(numero_proyecto)
+		FROM proyecto
+		WHERE numero_proyecto = #numero_proyecto#;
+  </select>
+
+	<select id="VerificarExistenciaDescripcionProyecto" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM proyecto
+		WHERE UPPER(TRIM(nombre_proyecto)) = UPPER(TRIM(#nombre_proyecto#))
+  </select>
+
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarProyecto" parameterClass="Proyecto">
+		INSERT INTO proyecto(
+            numero_proyecto, nombre_proyecto, departamento, provincia_canton, localidad)
+		VALUES(#numero_proyecto#,#nombre_proyecto#,#departamento#, #provincia_canton#, #localidad#);
+  </insert>
+
+	<update id="ModificarProyecto" parameterClass="Proyecto">
+		UPDATE proyecto
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="nombre_proyecto">nombre_proyecto=#nombre_proyecto#</isNotNull>
+			<isNotNull prepend="," property="departamento">departamento=#departamento#</isNotNull>
+			<isNotNull prepend="," property="provincia_canton">provincia_canton=#provincia_canton#</isNotNull>			
+			<isNotNull prepend="," property="localidad">localidad=#localidad#</isNotNull>
+		</dynamic>
+		WHERE numero_proyecto = #numero_proyecto#;
+	</update>
+	<delete id="EliminarProyecto">
+		DELETE FROM proyecto WHERE numero_proyecto = #numero_proyecto#
+  </delete>
+</sqlMap>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="Eccd">
+
+	<sql id="PropertiesEccd">
+		SELECT fecha_registro, peso, talla, 
+			CASE WHEN peso_talla IS NULL or peso_talla = '0' THEN '-1' ELSE peso_talla END AS peso_talla, sven, numero_caso
+		FROM eccd
+	</sql>
+
+	<select id="ObtenerEccd" resultClass="Eccd">
+		<include refid="PropertiesEccd" />
+		<dynamic prepend="WHERE">
+			<isGreaterThan property="numero_caso" compareValue="0" prepend="AND">
+				numero_caso = #numero_caso#
+			</isGreaterThan>
+			<isNotNull property="fecha_registro" prepend="AND">				
+				<!-- DATE_PART('YEAR', fecha_registro) = DATE_PART('YEAR', #fecha_registro#::date) -->
+				fecha_registro = #fecha_registro#
+		</isNotNull>
+		</dynamic>
+		ORDER BY fecha_registro ASC
+	</select>
+
+	<select id="VerificarIdEccd" resultClass="java.lang.Integer">
+		SELECT count(numero_caso)
+		FROM eccd
+		WHERE numero_caso = #numero_caso#
+  </select>
+	
+	<select id="BuscarEccd" resultClass="Eccd">
+		<include refid="PropertiesEccd" />		
+		<dynamic prepend="WHERE">
+			<iterate property="keywordList" open="(" close=")"
+				conjunction="OR">
+				cast(numero_caso as char(100)) like #keywordList[]# OR
+				to_char(fecha_registro,'YYYY-MM-DD') like
+				trim(replace(#keywordList[]#,'%',' '))
+		</iterate>
+		</dynamic>
+		ORDER BY fecha_registro ASC
+	</select>
+<!-- 	<select id="VerificarExistenciaDescripcionEccd" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM Eccd
+		WHERE UPPER(TRIM(nombre_Eccd)) = UPPER(TRIM(#nombre_Eccd#))
+  </select> -->
+	<select id="VerificarExistenciaGestionEccd" resultClass="java.lang.Integer">
+		SELECT count(fecha_registro)
+		FROM eccd
+		WHERE Numero_Caso = #numero_caso#
+		AND EXTRACT(YEAR FROM fecha_registro) = EXTRACT(YEAR FROM now())
+	</select>
+	<!-- Edicion de la Clase Proceso -->
+
+	<insert id="InsertarEccd" parameterClass="Eccd">
+		INSERT INTO eccd( fecha_registro, peso, talla, peso_talla, sven, numero_caso)
+		VALUES(#fecha_registro#, #peso#, #talla#, #peso_talla#, #sven#, #numero_caso#)
+  </insert>
+
+	<update id="ModificarEccd" parameterClass="Eccd">
+		UPDATE eccd
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="peso">peso=#peso#</isNotNull>
+			<isNotNull prepend="," property="talla">talla=#talla#</isNotNull>
+			<isNotNull prepend="," property="peso_talla">peso_talla= ObtenerTallaEdad(
+								(select f.fecha_nacimiento from familia f inner join afiliado af on f.codigo_persona = af.codigo_persona
+								where af.numero_caso = #numero_caso#),
+								(select f.sexo from familia f inner join afiliado af on f.codigo_persona = af.codigo_persona
+								where af.numero_caso = #numero_caso#),
+								#talla#
+							)
+			</isNotNull>
+			<isNotNull prepend="," property="sven">sven= ObtenerPesoEdad(
+								(select f.fecha_nacimiento from familia f inner join afiliado af on f.codigo_persona = af.codigo_persona
+								where af.numero_caso = #numero_caso#),
+								(select f.sexo from familia f inner join afiliado af on f.codigo_persona = af.codigo_persona
+								where af.numero_caso = #numero_caso#),
+								#peso#
+							)
+			</isNotNull>
+		</dynamic>
+<!--		WHERE DATE_PART('YEAR', fecha_registro) = DATE_PART('YEAR', #fecha_registro#::date)		-->
+                WHERE fecha_registro = #fecha_registro#
+		AND numero_caso = #numero_caso#
+	</update>
+	<delete id="EliminarEccd">
+		DELETE FROM eccd 
+		WHERE numero_caso = #numero_caso#
+		AND fecha_registro = #fecha_registro#;
+  </delete>
+  <!-- <parameterMap id="parametros" class="java.util.Map">
+		<parameter property="a" />
+	</parameterMap>
+	<procedure id="obtenerUltimoIdEccd" parameterMap="parametros"
+		resultClass="int">
+		{ call ObtenerUltimoIdEccd(?) }
+  </procedure> -->
+</sqlMap>
